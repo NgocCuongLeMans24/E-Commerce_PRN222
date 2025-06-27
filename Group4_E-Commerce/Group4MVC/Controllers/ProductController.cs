@@ -12,7 +12,6 @@ namespace Group4MVC.Controllers
             _productService = new ProductService(context);
         }
 
-        // Danh sách s?n ph?m v?i l?c, phân trang
         public IActionResult Index(int? categoryId, string? supplierId, string? keyword, int page = 1, int pageSize = 9)
         {
             int total;
@@ -23,18 +22,15 @@ namespace Group4MVC.Controllers
             return View(products);
         }
 
-        // Chi ti?t s?n ph?m
         public IActionResult Detail(int id)
         {
             var product = _productService.GetById(id);
             if (product == null) return NotFound();
             ViewBag.Related = _productService.GetRelatedProducts(id);
             ViewBag.SameSupplier = _productService.GetBySupplier(product.SupplierId);
-            // Hàng ?ã xem có th? l?u vào session ho?c cookie
             return View(product);
         }
 
-        // AJAX: L?c, phân trang
         [HttpGet]
         public IActionResult AjaxList(int? categoryId, string? supplierId, string? keyword, int page = 1, int pageSize = 9)
         {
