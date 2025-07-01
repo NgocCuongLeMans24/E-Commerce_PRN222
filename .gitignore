@@ -54,3 +54,4 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+Group4_E-Commerce/Group4MVC/appsettings.json
