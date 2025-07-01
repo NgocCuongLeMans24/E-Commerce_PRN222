@@ -1,22 +1,23 @@
-@model DAL_Group4_E_Commerce.Models.Product
+﻿@model DAL_Group4_E_Commerce.Models.Product
 @{
     ViewData["Title"] = "Product Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<!-- Breadcrumb Start -->
+
+<!-- Breadcrumb -->
 <div class="container-fluid">
     <div class="row px-xl-5">
         <div class="col-12">
             <nav class="breadcrumb bg-light mb-30">
                 <a class="breadcrumb-item text-dark" href="/">Home</a>
                 <a class="breadcrumb-item text-dark" href="@Url.Action("Index", "Product")">Shop</a>
-                <span class="breadcrumb-item active">Shop Detail</span>
+                <span class="breadcrumb-item active">Product Detail</span>
             </nav>
         </div>
     </div>
 </div>
-<!-- Breadcrumb End -->
-<!-- Shop Detail Start -->
+
+<!-- Product Detail -->
 <div class="container-fluid pb-5">
     <div class="row px-xl-5">
         <div class="col-lg-5 mb-30">
@@ -25,6 +26,7 @@
         <div class="col-lg-7 h-auto mb-30">
             <div class="h-100 bg-light p-30">
                 <h3>@Model.ProductName</h3>
+
                 <div class="d-flex mb-3">
                     <div class="text-primary mr-2">
                         <small class="fas fa-star"></small>
@@ -35,46 +37,89 @@
                     </div>
                     <small class="pt-1">(@Model.Views Reviews)</small>
                 </div>
-                <h3 class="font-weight-semi-bold mb-4">@Model.UnitPrice?.ToString("C0")</h3>
+
+                <h3 class="font-weight-semi-bold mb-4">
+                    @Model.UnitPrice?.ToString("C0")
+                </h3>
+
                 <p class="mb-4">@Model.Description</p>
-                <div class="d-flex align-items-center mb-4 pt-2">
-                    <button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To Cart</button>
-                </div>
+
+                <form asp-action="AddToCart"
+                      asp-controller="Cart"
+                      asp-route-id="@Model.ProductId"
+                      method="post"
+                      class="d-flex align-items-center mb-4 pt-2">
+
+                    <!-- Quantity selector -->
+                    <div class="input-group quantity me-3" style="width:120px;">
+                        <div class="input-group-btn">
+                            <button type="button"
+                                    class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                <i class="fa fa-minus">-</i>
+                            </button>
+                        </div>
+
+                        <input name="quantity"
+                               type="text"
+                               value="1"
+                               class="form-control form-control-sm text-center border-0"
+                               readonly>
+
+                        <div class="input-group-btn">
+                            <button type="button"
+                                    class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                <i class="fa fa-plus">+</i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add‑to‑Cart button -->
+                    <button type="submit" class="btn btn-primary px-3">
+                        <i class="fa fa-shopping-cart mr-1"></i>
+                        Add&nbsp;To&nbsp;Cart
+                    </button>
+                </form>
+
                 <div class="d-flex pt-2">
                     <strong class="text-dark mr-2">Share on:</strong>
                     <div class="d-inline-flex">
-                        <a class="text-dark px-2" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="text-dark px-2" href=""><i class="fab fa-twitter"></i></a>
-                        <a class="text-dark px-2" href=""><i class="fab fa-linkedin-in"></i></a>
-                        <a class="text-dark px-2" href=""><i class="fab fa-pinterest"></i></a>
+                        <a class="text-dark px-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a class="text-dark px-2" href="#"><i class="fab fa-twitter"></i></a>
+                        <a class="text-dark px-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a class="text-dark px-2" href="#"><i class="fab fa-pinterest"></i></a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Shop Detail End -->
 
-<!-- Related Products Start -->
-@if (ViewBag.Related != null && ((IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related).Any())
+<!-- Related Products -->
+@if (ViewBag.Related is IEnumerable<DAL_Group4_E_Commerce.Models.Product> related && related.Any())
 {
     <div class="container-fluid pb-5">
-        <h4>Sản phẩm cùng loại</h4>
+        <h4>Related Products</h4>
         <div class="row px-xl-5">
-            @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related)
+            @foreach (var product in related)
             {
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
                     <div class="product-item bg-light mb-4">
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-search"></i></a>
+                                <a class="btn btn-outline-dark btn-square"
+                                   href="@Url.Action("Detail", "Product", new { id = product.ProductId })">
+                                    <i class="fa fa-search"></i>
+                                </a>
                             </div>
                         </div>
                         <div class="text-center py-4">
-                            <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
+                            <a class="h6 text-decoration-none text-truncate"
+                               href="@Url.Action("Detail", "Product", new { id = product.ProductId })">
+                                @product.ProductName
+                            </a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
+                                <h5>@product.UnitPrice?.ToString("C0")</h5>
                             </div>
                         </div>
                     </div>
@@ -83,28 +128,33 @@
         </div>
     </div>
 }
-<!-- Related Products End -->
 
-<!-- Same Supplier Products Start -->
-@if (ViewBag.SameSupplier != null && ((IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier).Any())
+<!-- Same‑Supplier Products -->
+@if (ViewBag.SameSupplier is IEnumerable<DAL_Group4_E_Commerce.Models.Product> sameSupplier && sameSupplier.Any())
 {
     <div class="container-fluid pb-5">
-        <h4>Sản phẩm cùng nhà cung cấp</h4>
+        <h4>Products from the Same Supplier</h4>
         <div class="row px-xl-5">
-            @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier)
+            @foreach (var product in sameSupplier)
             {
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
                     <div class="product-item bg-light mb-4">
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-search"></i></a>
+                                <a class="btn btn-outline-dark btn-square"
+                                   href="@Url.Action("Detail", "Product", new { id = product.ProductId })">
+                                    <i class="fa fa-search"></i>
+                                </a>
                             </div>
                         </div>
                         <div class="text-center py-4">
-                            <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
+                            <a class="h6 text-decoration-none text-truncate"
+                               href="@Url.Action("Detail", "Product", new { id = product.ProductId })">
+                                @product.ProductName
+                            </a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
+                                <h5>@product.UnitPrice?.ToString("C0")</h5>
                             </div>
                         </div>
                     </div>
@@ -113,4 +163,26 @@
         </div>
     </div>
 }
-<!-- Same Supplier Products End -->
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const qtyWrap = document.querySelector('.quantity');
+            if (!qtyWrap) return;
+
+            qtyWrap.addEventListener('click', e => {
+                const minus = e.target.closest('.btn-minus');
+                const plus  = e.target.closest('.btn-plus');
+                if (!minus && !plus) return;
+
+                const input = qtyWrap.querySelector('input[name="quantity"]');
+                let val = parseInt(input.value || '1', 10);
+
+                if (plus)  val++;
+                if (minus && val > 1) val--;
+
+                input.value = val;
+            });
+        });
+    </script>
+}
