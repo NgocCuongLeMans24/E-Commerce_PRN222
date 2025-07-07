@@ -6,22 +6,23 @@
     var selectedSupplierId = Context.Request.Query["supplierId"].ToString();
     var keyword = Context.Request.Query["keyword"].ToString();
 }
-<!-- Breadcrumb Start -->
+
+<!-- Breadcrumb -->
 <div class="container-fluid">
     <div class="row px-xl-5">
         <div class="col-12">
             <nav class="breadcrumb bg-light mb-30">
                 <a class="breadcrumb-item text-dark" href="/">Home</a>
-                <span class="breadcrumb-item active">Shop List</span>
+                <span class="breadcrumb-item active">Shop</span>
             </nav>
         </div>
     </div>
 </div>
-<!-- Breadcrumb End -->
-<!-- Shop Start -->
+
+<!-- Shop -->
 <div class="container-fluid">
     <div class="row px-xl-5">
-        <!-- Shop Sidebar Start -->
+        <!-- Sidebar (add filters later) -->
         <div class="col-lg-3 col-md-4">
             <form method="get" action="@Url.Action("Index", "Product")" class="mb-4">
                 <div class="form-group">
@@ -71,8 +72,8 @@
                 <button type="submit" class="btn btn-primary w-100">Lọc</button>
             </form>
         </div>
-        <!-- Shop Sidebar End -->
-        <!-- Shop Product Start -->
+
+        <!-- Product Grid -->
         <div class="col-lg-9 col-md-8">
             <div id="product-list-container">
                 @Html.Partial("_ProductListPartial", Model)
@@ -98,7 +99,7 @@
                 </ul>
             </nav>
         </div>
-        <!-- Shop Product End -->
+        <!-- /Product Grid -->
     </div>
 </div>
 <!-- Shop End -->
