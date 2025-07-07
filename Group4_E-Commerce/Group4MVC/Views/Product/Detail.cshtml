@@ -62,7 +62,7 @@
     <div class="container-fluid pb-5 mt-5">
         <h4 class="mb-4">Sản phẩm cùng loại</h4>
         <div class="row px-xl-5">
-            @foreach (var product in related)
+            @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related)
             {
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
                     <div class="product-item bg-light mb-4 rounded shadow-sm">
@@ -73,12 +73,9 @@
                             </div>
                         </div>
                         <div class="text-center py-4">
-                            <a class="h6 text-decoration-none text-truncate"
-                               href="@Url.Action("Detail", "Product", new { id = product.ProductId })">
-                                @product.ProductName
-                            </a>
+                            <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@product.UnitPrice?.ToString("C0")</h5>
+                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
                             </div>
                         </div>
                     </div>
@@ -93,7 +90,7 @@
     <div class="container-fluid pb-5 mt-4">
         <h4 class="mb-4">Sản phẩm cùng nhà cung cấp</h4>
         <div class="row px-xl-5">
-            @foreach (var product in sameSupplier)
+            @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier)
             {
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
                     <div class="product-item bg-light mb-4 rounded shadow-sm">
@@ -104,12 +101,9 @@
                             </div>
                         </div>
                         <div class="text-center py-4">
-                            <a class="h6 text-decoration-none text-truncate"
-                               href="@Url.Action("Detail", "Product", new { id = product.ProductId })">
-                                @product.ProductName
-                            </a>
+                            <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@product.UnitPrice?.ToString("C0")</h5>
+                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
                             </div>
                         </div>
                     </div>
