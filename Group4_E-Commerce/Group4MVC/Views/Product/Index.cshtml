@@ -2,6 +2,9 @@
 @{
     ViewData["Title"] = "Shop";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var selectedCategoryId = Context.Request.Query["categoryId"].ToString();
+    var selectedSupplierId = Context.Request.Query["supplierId"].ToString();
+    var keyword = Context.Request.Query["keyword"].ToString();
 }
 <!-- Breadcrumb Start -->
 <div class="container-fluid">
@@ -20,49 +23,266 @@
     <div class="row px-xl-5">
         <!-- Shop Sidebar Start -->
         <div class="col-lg-3 col-md-4">
-            <!-- Sidebar filter c� th? b? sung sau -->
+            <form method="get" action="@Url.Action("Index", "Product")" class="mb-4">
+                <div class="form-group">
+                    <label for="categoryId">Loại hàng</label>
+                    <select class="form-control" id="categoryId" name="categoryId">
+                        <option value="">Tất cả</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var cat in ViewBag.Categories)
+                            {
+                                if (selectedCategoryId == cat.CategoryId.ToString())
+                                {
+                                    <option value="@cat.CategoryId" selected>@cat.CategoryName</option>
+                                }
+                                else
+                                {
+                                    <option value="@cat.CategoryId">@cat.CategoryName</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="supplierId">Nhà cung cấp</label>
+                    <select class="form-control" id="supplierId" name="supplierId">
+                        <option value="">Tất cả</option>
+                        @if (ViewBag.Suppliers != null)
+                        {
+                            foreach (var sup in ViewBag.Suppliers)
+                            {
+                                if (selectedSupplierId == sup.SupplierId.ToString())
+                                {
+                                    <option value="@sup.SupplierId" selected>@sup.CompanyName</option>
+                                }
+                                else
+                                {
+                                    <option value="@sup.SupplierId">@sup.CompanyName</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="keyword">Từ khóa</label>
+                    <input type="text" class="form-control" id="keyword" name="keyword" value="@keyword" placeholder="Tìm kiếm..." />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Lọc</button>
+            </form>
         </div>
         <!-- Shop Sidebar End -->
         <!-- Shop Product Start -->
         <div class="col-lg-9 col-md-8">
-            <div class="row pb-3">
-                @foreach (var product in Model)
-                {
-                    <div class="col-lg-4 col-md-6 col-sm-6 pb-1">
-                        <div class="product-item bg-light mb-4">
-                            <div class="product-img position-relative overflow-hidden">
-                                <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
-                                <div class="product-action">
-                                    <a class="btn btn-outline-dark btn-square" href="#"><i class="fa fa-shopping-cart"></i></a>
-                                    <a class="btn btn-outline-dark btn-square" href="#"><i class="far fa-heart"></i></a>
-                                    <a class="btn btn-outline-dark btn-square" href="#"><i class="fa fa-sync-alt"></i></a>
-                                    <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-search"></i></a>
-                                </div>
-                            </div>
-                            <div class="text-center py-4">
-                                <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
-                                <div class="d-flex align-items-center justify-content-center mt-2">
-                                    <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
-                                    @if (product.Discount > 0)
-                                    {
-                                        <h6 class="text-muted ml-2"><del>@((product.UnitPrice * (1 + product.Discount/100))?.ToString("C0"))</del></h6>
-                                    }
-                                </div>
-                                <div class="d-flex align-items-center justify-content-center mb-1">
-                                    <small class="fa fa-star text-primary mr-1"></small>
-                                    <small class="fa fa-star text-primary mr-1"></small>
-                                    <small class="fa fa-star text-primary mr-1"></small>
-                                    <small class="fa fa-star text-primary mr-1"></small>
-                                    <small class="fa fa-star text-primary mr-1"></small>
-                                    <small>(@product.Views)</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
+            <div id="product-list-container">
+                @Html.Partial("_ProductListPartial", Model)
             </div>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    @{
+                        int total = ViewBag.Total ?? 0;
+                        int page = ViewBag.Page ?? 1;
+                        int pageSize = ViewBag.PageSize ?? 9;
+                        int totalPages = (int)Math.Ceiling((double)total / pageSize);
+                        string queryString = $"&categoryId={selectedCategoryId}&supplierId={selectedSupplierId}&keyword={keyword}";
+                    }
+                    @if (totalPages > 1)
+                    {
+                        for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == page ? "active" : "")">
+                                <a class="page-link page-ajax-link" href="#" data-page="@i">@i</a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </nav>
         </div>
         <!-- Shop Product End -->
     </div>
 </div>
 <!-- Shop End -->
+<div id="compare-float-btn" style="position:fixed;bottom:40px;right:40px;z-index:9999;display:none;">
+    <button class="btn btn-primary btn-lg shadow" id="go-compare-btn">
+        🔄 Xem so sánh (<span id="compare-count">0</span>)
+    </button>
+</div>
+@section Scripts {
+<script>
+    // Helper: get/set array from localStorage
+    function getList(key) {
+        return JSON.parse(localStorage.getItem(key) || '[]');
+    }
+    function setList(key, arr) {
+        localStorage.setItem(key, JSON.stringify(arr));
+    }
+
+    // Cập nhật trạng thái icon khi load trang hoặc sau khi ajax load
+    function updateIcons() {
+        var wishlist = getList('wishlist');
+        var compare = getList('compare');
+        $('.wishlist-btn').each(function () {
+            var pid = $(this).data('product-id');
+            if (wishlist.includes(pid)) {
+                $(this).addClass('active-wishlist').attr('title', 'Bỏ khỏi yêu thích').tooltip('dispose').tooltip();
+            } else {
+                $(this).removeClass('active-wishlist').attr('title', 'Yêu thích').tooltip('dispose').tooltip();
+            }
+        });
+        $('.compare-btn').each(function () {
+            var pid = $(this).data('product-id');
+            if (compare.includes(pid)) {
+                $(this).addClass('active-compare').attr('title', 'Bỏ khỏi so sánh').tooltip('dispose').tooltip();
+            } else {
+                $(this).removeClass('active-compare').attr('title', 'So sánh').tooltip('dispose').tooltip();
+            }
+        });
+        updateCompareBtn();
+    }
+
+    // Xử lý click wishlist
+    $(document).on('click', '.wishlist-btn', function (e) {
+        e.preventDefault();
+        var pid = $(this).data('product-id');
+        var wishlist = getList('wishlist');
+        if (wishlist.includes(pid)) {
+            wishlist = wishlist.filter(x => x !== pid);
+        } else {
+            wishlist.push(pid);
+        }
+        setList('wishlist', wishlist);
+        updateIcons();
+    });
+
+    // Xử lý click compare
+    $(document).on('click', '.compare-btn', function (e) {
+        e.preventDefault();
+        var pid = $(this).data('product-id');
+        var compare = getList('compare');
+        if (compare.includes(pid)) {
+            compare = compare.filter(x => x !== pid);
+        } else {
+            if (compare.length >= 4) {
+                alert('Bạn chỉ có thể so sánh tối đa 4 sản phẩm!');
+                return;
+            }
+            compare.push(pid);
+        }
+        setList('compare', compare);
+        updateIcons();
+    });
+
+    // Khi load trang, cập nhật icon
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        updateIcons();
+    });
+
+    // Gọi lại updateIcons sau mỗi lần ajax load (phân trang, lọc)
+    function afterAjaxProductList() {
+        $('[data-toggle="tooltip"]').tooltip();
+        updateIcons();
+    }
+
+    // Hook vào ajax load của phân trang/lọc
+    // (Tìm đoạn $.get hoặc ajax load sản phẩm, thêm afterAjaxProductList vào callback)
+    // Ví dụ:
+    // $.get(..., function(data) { $('#product-list-container').html(data); afterAjaxProductList(); });
+
+    // Nếu bạn dùng tên hàm khác, hãy thay thế cho đúng!
+
+    function loadProductsAjax(params, pushUrl = true) {
+        $.get('@Url.Action("AjaxList", "Product")', params, function (data) {
+            $('#product-list-container').html(data);
+            if (pushUrl) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('categoryId', params.categoryId || '');
+                url.searchParams.set('supplierId', params.supplierId || '');
+                url.searchParams.set('keyword', params.keyword || '');
+                url.searchParams.set('page', params.page || 1);
+                window.history.pushState(params, '', url.pathname + url.search);
+            }
+            afterAjaxProductList();
+        });
+    }
+
+    $(document).on('click', '.page-ajax-link', function (e) {
+        e.preventDefault();
+        var page = $(this).data('page');
+        var categoryId = $('#categoryId').val();
+        var supplierId = $('#supplierId').val();
+        var keyword = $('#keyword').val();
+        loadProductsAjax({ categoryId, supplierId, keyword, page });
+    });
+
+    // AJAX cho form lọc
+    $(document).on('submit', 'form', function (e) {
+        if ($(this).find('#categoryId').length > 0) {
+            e.preventDefault();
+            var categoryId = $('#categoryId').val();
+            var supplierId = $('#supplierId').val();
+            var keyword = $('#keyword').val();
+            loadProductsAjax({ categoryId, supplierId, keyword, page: 1 });
+        }
+    });
+
+    // Lắng nghe back/forward
+    window.addEventListener('popstate', function (event) {
+        var params = event.state;
+        if (params) {
+            loadProductsAjax(params, false);
+        } else {
+            // Nếu không có state, lấy từ URL
+            var url = new URL(window.location.href);
+            var categoryId = url.searchParams.get('categoryId') || '';
+            var supplierId = url.searchParams.get('supplierId') || '';
+            var keyword = url.searchParams.get('keyword') || '';
+            var page = url.searchParams.get('page') || 1;
+            loadProductsAjax({ categoryId, supplierId, keyword, page }, false);
+        }
+    });
+
+    // Khi load trang, nếu có query string thì tự động load đúng trạng thái (chỉ khi không phải trang đầu)
+    $(document).ready(function () {
+        var url = new URL(window.location.href);
+        var hasQuery = url.search.length > 0;
+        if (hasQuery) {
+            var categoryId = url.searchParams.get('categoryId') || '';
+            var supplierId = url.searchParams.get('supplierId') || '';
+            var keyword = url.searchParams.get('keyword') || '';
+            var page = url.searchParams.get('page') || 1;
+            loadProductsAjax({ categoryId, supplierId, keyword, page }, false);
+        }
+    });
+
+    // Hiển thị nút nổi Xem so sánh nếu có sản phẩm được chọn
+    function updateCompareBtn() {
+        var compare = getList('compare');
+        if (compare.length > 0) {
+            $('#compare-float-btn').show();
+            $('#compare-count').text(compare.length);
+        } else {
+            $('#compare-float-btn').hide();
+        }
+    }
+
+    // Khi bấm nút Xem so sánh
+    $(document).on('click', '#go-compare-btn', function () {
+        var compare = getList('compare');
+        if (compare.length === 0) return;
+        window.location.href = '/Product/Compare?ids=' + compare.join(',');
+    });
+</script>
+<style>
+    .active-wishlist {
+        color: #dc3545 !important;
+        background: #ffe6ea !important;
+        border-color: #dc3545 !important;
+    }
+    .active-compare {
+        color: #007bff !important;
+        background: #e6f0ff !important;
+        border-color: #007bff !important;
+    }
+</style>
+}

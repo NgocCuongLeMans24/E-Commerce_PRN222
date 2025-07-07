@@ -1,74 +1,75 @@
-@model DAL_Group4_E_Commerce.Models.Product
+﻿@model DAL_Group4_E_Commerce.Models.Product
 @{
-    ViewData["Title"] = "Product Detail";
+    ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<!-- Breadcrumb Start -->
-<div class="container-fluid">
-    <div class="row px-xl-5">
-        <div class="col-12">
-            <nav class="breadcrumb bg-light mb-30">
-                <a class="breadcrumb-item text-dark" href="/">Home</a>
-                <a class="breadcrumb-item text-dark" href="@Url.Action("Index", "Product")">Shop</a>
-                <span class="breadcrumb-item active">Shop Detail</span>
-            </nav>
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/Product">Product</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.ProductName</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm p-3">
+            <img class="w-100 mb-2 rounded" src="@Model.Image" alt="@Model.ProductName" style="max-height:350px;object-fit:contain;">
+            @if (Model.Discount > 0)
+            {
+                <span class="badge badge-danger position-absolute" style="top:20px; right:30px; font-size:1.1rem; padding:0.6em 1.2em; border-radius:1em;">-@Model.Discount% OFF</span>
+            }
         </div>
     </div>
-</div>
-<!-- Breadcrumb End -->
-<!-- Shop Detail Start -->
-<div class="container-fluid pb-5">
-    <div class="row px-xl-5">
-        <div class="col-lg-5 mb-30">
-            <img class="w-100 h-100" src="@Model.Image" alt="@Model.ProductName" />
-        </div>
-        <div class="col-lg-7 h-auto mb-30">
-            <div class="h-100 bg-light p-30">
-                <h3>@Model.ProductName</h3>
-                <div class="d-flex mb-3">
-                    <div class="text-primary mr-2">
-                        <small class="fas fa-star"></small>
-                        <small class="fas fa-star"></small>
-                        <small class="fas fa-star"></small>
-                        <small class="fas fa-star-half-alt"></small>
-                        <small class="far fa-star"></small>
-                    </div>
-                    <small class="pt-1">(@Model.Views Reviews)</small>
+    <div class="col-md-7">
+        <div class="card shadow-sm p-4">
+            <h2 class="mb-3 font-weight-bold">@Model.ProductName</h2>
+            <div class="mb-3">
+                <span class="h4 text-danger font-weight-bold">@((Model.UnitPrice * (1 - Model.Discount/100.0))?.ToString("C0"))</span>
+                @if (Model.Discount > 0)
+                {
+                    <span class="h6 text-muted ml-2"><del>@Model.UnitPrice?.ToString("C0")</del></span>
+                }
+            </div>
+            <div class="mb-3">
+                <span class="badge badge-info">@Model.Supplier?.CompanyName</span>
+                <span class="ml-3"><i class="fa fa-eye"></i> @Model.Views lượt xem</span>
+            </div>
+            <div class="mb-4">
+                <button class="btn btn-primary btn-lg font-weight-bold px-4"><i class="fa fa-shopping-cart mr-2"></i>Thêm vào giỏ</button>
+                <button class="btn btn-outline-danger btn-lg font-weight-bold px-4 ml-2 wishlist-btn-detail" data-product-id="@Model.ProductId" data-toggle="tooltip" title="Yêu thích"><span class="wishlist-icon-detail">❤️</span></button>
+            </div>
+            <div class="mb-4">
+                <h5 class="font-weight-bold mb-2">Mô tả sản phẩm</h5>
+                <div class="bg-light rounded p-3 border">
+                    @Model.Description
                 </div>
-                <h3 class="font-weight-semi-bold mb-4">@Model.UnitPrice?.ToString("C0")</h3>
-                <p class="mb-4">@Model.Description</p>
-                <div class="d-flex align-items-center mb-4 pt-2">
-                    <button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To Cart</button>
-                </div>
-                <div class="d-flex pt-2">
-                    <strong class="text-dark mr-2">Share on:</strong>
-                    <div class="d-inline-flex">
-                        <a class="text-dark px-2" href=""><i class="fab fa-facebook-f"></i></a>
-                        <a class="text-dark px-2" href=""><i class="fab fa-twitter"></i></a>
-                        <a class="text-dark px-2" href=""><i class="fab fa-linkedin-in"></i></a>
-                        <a class="text-dark px-2" href=""><i class="fab fa-pinterest"></i></a>
-                    </div>
-                </div>
+            </div>
+            <div class="mb-2">
+                <strong>Chia sẻ:</strong>
+                <a class="btn btn-light btn-sm ml-2" href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a class="btn btn-light btn-sm ml-1" href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                <a class="btn btn-light btn-sm ml-1" href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a class="btn btn-light btn-sm ml-1" href="#" title="Pinterest"><i class="fab fa-pinterest"></i></a>
             </div>
         </div>
     </div>
 </div>
-<!-- Shop Detail End -->
 
-<!-- Related Products Start -->
 @if (ViewBag.Related != null && ((IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related).Any())
 {
-    <div class="container-fluid pb-5">
-        <h4>Sản phẩm cùng loại</h4>
+    <div class="container-fluid pb-5 mt-5">
+        <h4 class="mb-4">Sản phẩm cùng loại</h4>
         <div class="row px-xl-5">
             @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related)
             {
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                    <div class="product-item bg-light mb-4">
+                    <div class="product-item bg-light mb-4 rounded shadow-sm">
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-search"></i></a>
+                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-eye"></i></a>
                             </div>
                         </div>
                         <div class="text-center py-4">
@@ -83,22 +84,20 @@
         </div>
     </div>
 }
-<!-- Related Products End -->
 
-<!-- Same Supplier Products Start -->
 @if (ViewBag.SameSupplier != null && ((IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier).Any())
 {
-    <div class="container-fluid pb-5">
-        <h4>Sản phẩm cùng nhà cung cấp</h4>
+    <div class="container-fluid pb-5 mt-4">
+        <h4 class="mb-4">Sản phẩm cùng nhà cung cấp</h4>
         <div class="row px-xl-5">
             @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier)
             {
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                    <div class="product-item bg-light mb-4">
+                    <div class="product-item bg-light mb-4 rounded shadow-sm">
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-search"></i></a>
+                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-eye"></i></a>
                             </div>
                         </div>
                         <div class="text-center py-4">
@@ -113,4 +112,48 @@
         </div>
     </div>
 }
-<!-- Same Supplier Products End -->
+
+@section Scripts {
+<script>
+    // Wishlist cho trang chi tiết
+    function getWishlist() {
+        return JSON.parse(localStorage.getItem('wishlist') || '[]');
+    }
+    function setWishlist(arr) {
+        localStorage.setItem('wishlist', JSON.stringify(arr));
+    }
+    function updateWishlistDetail() {
+        var wishlist = getWishlist();
+        var pid = parseInt($('.wishlist-btn-detail').data('product-id'));
+        if (wishlist.includes(pid)) {
+            $('.wishlist-btn-detail').addClass('active-wishlist').attr('title', 'Bỏ khỏi yêu thích');
+            $('.wishlist-icon-detail').css({color:'#dc3545'});
+        } else {
+            $('.wishlist-btn-detail').removeClass('active-wishlist').attr('title', 'Yêu thích');
+            $('.wishlist-icon-detail').css({color:''});
+        }
+        $('.wishlist-btn-detail').tooltip('dispose').tooltip();
+    }
+    $(function () {
+        updateWishlistDetail();
+        $(document).on('click', '.wishlist-btn-detail', function (e) {
+            e.preventDefault();
+            var pid = parseInt($(this).data('product-id'));
+            var wishlist = getWishlist();
+            if (wishlist.includes(pid)) {
+                wishlist = wishlist.filter(x => x !== pid);
+            } else {
+                wishlist.push(pid);
+            }
+            setWishlist(wishlist);
+            updateWishlistDetail();
+        });
+    });
+</script>
+<style>
+    .active-wishlist .wishlist-icon-detail {
+        color: #dc3545 !important;
+        text-shadow: 0 2px 8px rgba(220,53,69,0.15);
+    }
+</style>
+}

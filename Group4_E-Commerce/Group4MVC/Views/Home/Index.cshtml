@@ -1,8 +1,68 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Trang chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Banner -->
+<div class="jumbotron jumbotron-fluid bg-primary text-white text-center mb-5" style="background: linear-gradient(90deg,#007bff 60%,#6610f2 100%);">
+    <div class="container py-5">
+        <h1 class="display-4 font-weight-bold">Chào mừng đến với Group4 E-Shop!</h1>
+        <p class="lead">Nơi mua sắm các sản phẩm điện tử, công nghệ, phụ kiện chính hãng với giá tốt nhất.</p>
+        <a href="/Product" class="btn btn-warning btn-lg mt-3 font-weight-bold">Khám phá ngay <i class="fa fa-arrow-right ml-2"></i></a>
+    </div>
+</div>
+<!-- Sản phẩm nổi bật (giả lập) -->
+<div class="container mb-5">
+    <h2 class="mb-4 text-center font-weight-bold">Sản phẩm nổi bật</h2>
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="/wwwroot/img/product-1.jpg" class="card-img-top" alt="Sản phẩm 1">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Tai nghe Bluetooth</h5>
+                    <p class="card-text text-danger font-weight-bold">499.000đ <span class="badge badge-danger ml-2">-20%</span></p>
+                    <a href="/Product/Detail/1" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="/wwwroot/img/product-2.jpg" class="card-img-top" alt="Sản phẩm 2">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Loa Bluetooth</h5>
+                    <p class="card-text text-danger font-weight-bold">799.000đ <span class="badge badge-danger ml-2">-15%</span></p>
+                    <a href="/Product/Detail/2" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="/wwwroot/img/product-3.jpg" class="card-img-top" alt="Sản phẩm 3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Bàn phím cơ</h5>
+                    <p class="card-text text-danger font-weight-bold">1.299.000đ <span class="badge badge-danger ml-2">-10%</span></p>
+                    <a href="/Product/Detail/3" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="/wwwroot/img/product-4.jpg" class="card-img-top" alt="Sản phẩm 4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Chuột gaming</h5>
+                    <p class="card-text text-danger font-weight-bold">399.000đ <span class="badge badge-danger ml-2">-25%</span></p>
+                    <a href="/Product/Detail/4" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- CTA -->
+<div class="container text-center mb-5">
+    <div class="p-4 bg-light rounded shadow-sm">
+        <h4 class="mb-3">Đăng ký nhận tin khuyến mãi</h4>
+        <form class="form-inline justify-content-center">
+            <input type="email" class="form-control mr-2" placeholder="Nhập email của bạn..." style="min-width:250px;">
+            <button type="submit" class="btn btn-primary">Đăng ký</button>
+        </form>
+    </div>
 </div>

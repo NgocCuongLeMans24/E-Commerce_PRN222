@@ -41,5 +41,15 @@ namespace BUS_Group4_E_Commerce
         {
             return _productRepository.GetBySupplier(supplierId, take);
         }
+
+        public List<Category> GetCategories()
+        {
+            return _productRepository.GetCategories();
+        }
+
+        public List<Supplier> GetSuppliers()
+        {
+            return _productRepository.GetSuppliers();
+        }
     }
 }

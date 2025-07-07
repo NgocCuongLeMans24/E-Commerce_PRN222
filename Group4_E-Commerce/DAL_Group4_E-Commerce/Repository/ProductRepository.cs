@@ -60,5 +60,15 @@ namespace DAL_Group4_E_Commerce.Repository
                 .Take(take)
                 .ToList();
         }
+
+        public List<Category> GetCategories()
+        {
+            return _context.Categories.ToList();
+        }
+
+        public List<Supplier> GetSuppliers()
+        {
+            return _context.Suppliers.ToList();
+        }
     }
 }

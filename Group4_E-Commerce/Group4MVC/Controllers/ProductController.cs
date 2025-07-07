@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BUS_Group4_E_Commerce;
 using DAL_Group4_E_Commerce.Models;
+using System.Linq;
 
 namespace Group4MVC.Controllers
 {
@@ -19,6 +20,8 @@ namespace Group4MVC.Controllers
             ViewBag.Total = total;
             ViewBag.Page = page;
             ViewBag.PageSize = pageSize;
+            ViewBag.Categories = _productService.GetCategories();
+            ViewBag.Suppliers = _productService.GetSuppliers();
             return View(products);
         }
 
@@ -36,7 +39,19 @@ namespace Group4MVC.Controllers
         {
             int total;
             var products = _productService.GetPaged(page, pageSize, out total, categoryId, supplierId, keyword);
+            ViewBag.Categories = _productService.GetCategories();
+            ViewBag.Suppliers = _productService.GetSuppliers();
             return PartialView("_ProductListPartial", products);
+        }
+
+        [HttpGet]
+        public IActionResult Compare(string ids)
+        {
+            if (string.IsNullOrEmpty(ids)) return RedirectToAction("Index");
+            var idList = ids.Split(',').Select(id => int.TryParse(id, out var i) ? i : (int?)null).Where(i => i.HasValue).Select(i => i.Value).ToList();
+            if (!idList.Any()) return RedirectToAction("Index");
+            var products = _productService.GetAll().Where(p => idList.Contains(p.ProductId)).ToList();
+            return View(products);
         }
     }
 }

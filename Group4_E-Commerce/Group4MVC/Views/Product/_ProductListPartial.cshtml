@@ -1,0 +1,153 @@
+@model IEnumerable<DAL_Group4_E_Commerce.Models.Product>
+<div class="row pb-3">
+    @foreach (var product in Model)
+    {
+        <div class="col-lg-4 col-md-6 col-sm-6 pb-1">
+            <div class="product-item bg-light mb-4">
+                <div class="product-img position-relative overflow-hidden">
+                    <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
+                    @if (product.Discount > 0)
+                    {
+                        <span class="badge badge-danger position-absolute discount-badge" title="Giảm giá">-@product.Discount% <i class='fa fa-bolt'></i></span>
+                    }
+                    <div class="product-action">
+                        <a class="btn btn-outline-dark btn-square action-btn add-to-cart-btn" href="#" data-toggle="tooltip" title="Thêm vào giỏ" aria-label="Thêm vào giỏ hàng" data-product-id="@product.ProductId">🛒</a>
+                        <a class="btn btn-outline-dark btn-square action-btn wishlist-btn" href="#" data-toggle="tooltip" title="Yêu thích" aria-label="Yêu thích" data-product-id="@product.ProductId">❤️</a>
+                        <a class="btn btn-outline-dark btn-square action-btn compare-btn" href="#" data-toggle="tooltip" title="So sánh" aria-label="So sánh" data-product-id="@product.ProductId">🔄</a>
+                        <a class="btn btn-outline-dark btn-square action-btn" href="@Url.Action("Detail", "Product", new { id = product.ProductId })" data-toggle="tooltip" title="Xem chi tiết" aria-label="Xem chi tiết">👁️</a>
+                    </div>
+                </div>
+                <div class="text-center py-4">
+                    <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
+                    <div class="d-flex align-items-center justify-content-center mt-2">
+                        <h5 class="mb-0 text-danger font-weight-bold">@((product.UnitPrice * (1 - product.Discount/100.0))?.ToString("C0"))</h5>
+                        @if (product.Discount > 0)
+                        {
+                            <h6 class="text-muted ml-2 mb-0"><del>@(product.UnitPrice?.ToString("C0"))</del></h6>
+                        }
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center mb-1">
+                        <small class="fa fa-star text-primary mr-1"></small>
+                        <small class="fa fa-star text-primary mr-1"></small>
+                        <small class="fa fa-star text-primary mr-1"></small>
+                        <small class="fa fa-star text-primary mr-1"></small>
+                        <small class="fa fa-star text-primary mr-1"></small>
+                        <small>(@product.Views)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<style>
+    .action-btn {
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .action-btn:hover {
+        transform: scale(1.15);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        background: #f8f9fa;
+    }
+    .discount-badge {
+        top: 10px;
+        right: 10px;
+        z-index: 2;
+        font-size: 1rem;
+        padding: 0.5em 1em;
+        border-radius: 1em;
+        background: #dc3545;
+        color: #fff;
+        font-weight: bold;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 8px rgba(220,53,69,0.15);
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+    }
+    .text-danger.font-weight-bold {
+        color: #dc3545 !important;
+        font-weight: bold !important;
+    }
+    .active-wishlist {
+        color: #dc3545 !important;
+        background: #ffe6ea !important;
+        border-color: #dc3545 !important;
+    }
+    .active-compare {
+        color: #007bff !important;
+        background: #e6f0ff !important;
+        border-color: #007bff !important;
+    }
+</style>
+@section Scripts {
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Helper: get/set array from localStorage
+        function getList(key) {
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+        function setList(key, arr) {
+            localStorage.setItem(key, JSON.stringify(arr));
+        }
+
+        // Cập nhật trạng thái icon khi load trang
+        function updateIcons() {
+            var wishlist = getList('wishlist');
+            var compare = getList('compare');
+            $('.wishlist-btn').each(function () {
+                var pid = $(this).data('product-id');
+                if (wishlist.includes(pid)) {
+                    $(this).addClass('active-wishlist').attr('title', 'Bỏ khỏi yêu thích').tooltip('dispose').tooltip();
+                } else {
+                    $(this).removeClass('active-wishlist').attr('title', 'Yêu thích').tooltip('dispose').tooltip();
+                }
+            });
+            $('.compare-btn').each(function () {
+                var pid = $(this).data('product-id');
+                if (compare.includes(pid)) {
+                    $(this).addClass('active-compare').attr('title', 'Bỏ khỏi so sánh').tooltip('dispose').tooltip();
+                } else {
+                    $(this).removeClass('active-compare').attr('title', 'So sánh').tooltip('dispose').tooltip();
+                }
+            });
+        }
+
+        // Xử lý click wishlist
+        $(document).on('click', '.wishlist-btn', function (e) {
+            e.preventDefault();
+            var pid = $(this).data('product-id');
+            var wishlist = getList('wishlist');
+            if (wishlist.includes(pid)) {
+                wishlist = wishlist.filter(x => x !== pid);
+            } else {
+                wishlist.push(pid);
+            }
+            setList('wishlist', wishlist);
+            updateIcons();
+        });
+
+        // Xử lý click compare
+        $(document).on('click', '.compare-btn', function (e) {
+            e.preventDefault();
+            var pid = $(this).data('product-id');
+            var compare = getList('compare');
+            if (compare.includes(pid)) {
+                compare = compare.filter(x => x !== pid);
+            } else {
+                if (compare.length >= 4) {
+                    alert('Bạn chỉ có thể so sánh tối đa 4 sản phẩm!');
+                    return;
+                }
+                compare.push(pid);
+            }
+            setList('compare', compare);
+            updateIcons();
+        });
+
+        // Khi load trang, cập nhật icon
+        updateIcons();
+    });
+</script>
+} 
