@@ -13,8 +13,7 @@ namespace GUI_Group4_ECommerce.Controllers
             db = context;
         }
 
-        const string CART_KEY = "MYCART";
-        public List<CartItem> CartItems => HttpContext.Session.Get<List<CartItem>>(CART_KEY) ?? new
+        public List<CartItem> CartItems => HttpContext.Session.Get<List<CartItem>>(MySetting.CART_KEY) ?? new
             List<CartItem>();
         public IActionResult Index()
         {
@@ -45,7 +44,7 @@ namespace GUI_Group4_ECommerce.Controllers
             {
                 item.Quantity += quantity;
             }
-            HttpContext.Session.Set(CART_KEY, cart);
+            HttpContext.Session.Set(MySetting.CART_KEY, cart);
                 return RedirectToAction("index");
         }
 
@@ -57,7 +56,7 @@ namespace GUI_Group4_ECommerce.Controllers
             {
                 item.Quantity += delta;
                 if (item.Quantity <= 0) cart.Remove(item);
-                HttpContext.Session.Set(CART_KEY, cart);
+                HttpContext.Session.Set(MySetting.CART_KEY, cart);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -69,7 +68,7 @@ namespace GUI_Group4_ECommerce.Controllers
             if (item != null)
             {
                 cart.Remove(item);
-                HttpContext.Session.Set(CART_KEY, cart);
+                HttpContext.Session.Set(MySetting.CART_KEY, cart);
             }
             return RedirectToAction(nameof(Index));
         }
