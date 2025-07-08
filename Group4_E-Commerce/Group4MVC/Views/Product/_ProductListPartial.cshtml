@@ -8,13 +8,15 @@
                     <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
                     @if (product.Discount > 0)
                     {
-                        <span class="badge badge-danger position-absolute discount-badge" title="Giảm giá">-@product.Discount% <i class='fa fa-bolt'></i></span>
+                        <span class="badge badge-danger position-absolute discount-badge" title="Discount">-@product.Discount% <i class='fa fa-bolt'></i></span>
                     }
                     <div class="product-action">
-                        <a class="btn btn-outline-dark btn-square action-btn add-to-cart-btn" href="#" data-toggle="tooltip" title="Thêm vào giỏ" aria-label="Thêm vào giỏ hàng" data-product-id="@product.ProductId">🛒</a>
-                        <a class="btn btn-outline-dark btn-square action-btn wishlist-btn" href="#" data-toggle="tooltip" title="Yêu thích" aria-label="Yêu thích" data-product-id="@product.ProductId">❤️</a>
-                        <a class="btn btn-outline-dark btn-square action-btn compare-btn" href="#" data-toggle="tooltip" title="So sánh" aria-label="So sánh" data-product-id="@product.ProductId">🔄</a>
-                        <a class="btn btn-outline-dark btn-square action-btn" href="@Url.Action("Detail", "Product", new { id = product.ProductId })" data-toggle="tooltip" title="Xem chi tiết" aria-label="Xem chi tiết">👁️</a>
+                        <a class="btn btn-outline-dark btn-square action-btn add-to-cart-btn" asp-action="AddToCart"
+                           asp-controller="Cart"
+                           asp-route-id="@product.ProductId" data-toggle="tooltip" title="Add to cart" aria-label="Add to cart">🛒</a>
+                        <a class="btn btn-outline-dark btn-square action-btn wishlist-btn" href="#" data-toggle="tooltip" title="Favourite" aria-label="Favourite" data-product-id="@product.ProductId">❤️</a>
+                        <a class="btn btn-outline-dark btn-square action-btn compare-btn" href="#" data-toggle="tooltip" title="Compare" aria-label="Compare" data-product-id="@product.ProductId">🔄</a>
+                        <a class="btn btn-outline-dark btn-square action-btn" href="@Url.Action("Detail", "Product", new { id = product.ProductId })" data-toggle="tooltip" title="Details" aria-label="Details">👁️</a>
                     </div>
                 </div>
                 <div class="text-center py-4">
@@ -99,17 +101,17 @@
             $('.wishlist-btn').each(function () {
                 var pid = $(this).data('product-id');
                 if (wishlist.includes(pid)) {
-                    $(this).addClass('active-wishlist').attr('title', 'Bỏ khỏi yêu thích').tooltip('dispose').tooltip();
+                        $(this).addClass('active-wishlist').attr('title', 'Remove from favorites').tooltip('dispose').tooltip();
                 } else {
-                    $(this).removeClass('active-wishlist').attr('title', 'Yêu thích').tooltip('dispose').tooltip();
+                        $(this).removeClass('active-wishlist').attr('title', 'Favourite').tooltip('dispose').tooltip();
                 }
             });
             $('.compare-btn').each(function () {
                 var pid = $(this).data('product-id');
                 if (compare.includes(pid)) {
-                    $(this).addClass('active-compare').attr('title', 'Bỏ khỏi so sánh').tooltip('dispose').tooltip();
+                        $(this).addClass('active-compare').attr('title', 'Quit comparing').tooltip('dispose').tooltip();
                 } else {
-                    $(this).removeClass('active-compare').attr('title', 'So sánh').tooltip('dispose').tooltip();
+                    $(this).removeClass('active-compare').attr('title', 'Compare').tooltip('dispose').tooltip();
                 }
             });
         }
@@ -137,7 +139,7 @@
                 compare = compare.filter(x => x !== pid);
             } else {
                 if (compare.length >= 4) {
-                    alert('Bạn chỉ có thể so sánh tối đa 4 sản phẩm!');
+                        alert('You can only compare up to 4 products!');
                     return;
                 }
                 compare.push(pid);

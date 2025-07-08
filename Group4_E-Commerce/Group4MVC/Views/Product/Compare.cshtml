@@ -1,12 +1,12 @@
 @model List<DAL_Group4_E_Commerce.Models.Product>
 @{
-    ViewData["Title"] = "So sánh sản phẩm";
+    ViewData["Title"] = "Product Comparison";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2 class="my-4">So sánh sản phẩm</h2>
+<h2 class="my-4">Product Comparison</h2>
 @if (Model == null || !Model.Any())
 {
-    <div class="alert alert-warning">Không có sản phẩm nào để so sánh.</div>
+    <div class="alert alert-warning">No products to compare.</div>
 }
 else
 {
@@ -14,7 +14,7 @@ else
         <table class="table table-bordered text-center align-middle">
             <thead class="thead-light">
                 <tr>
-                    <th>Thuộc tính</th>
+                    <th>Attribute</th>
                     @foreach (var p in Model)
                     {
                         <th>@p.ProductName</th>
@@ -23,42 +23,42 @@ else
             </thead>
             <tbody>
                 <tr>
-                    <td>Ảnh</td>
+                    <td>Image</td>
                     @foreach (var p in Model)
                     {
                         <td><img src="@p.Image" alt="@p.ProductName" style="max-width:100px;max-height:100px;"></td>
                     }
                 </tr>
                 <tr>
-                    <td>Giá gốc</td>
+                    <td>Original Price</td>
                     @foreach (var p in Model)
                     {
                         <td>@p.UnitPrice?.ToString("C0")</td>
                     }
                 </tr>
                 <tr>
-                    <td>Giá sau giảm</td>
+                    <td>Discounted Price</td>
                     @foreach (var p in Model)
                     {
-                        <td class="text-danger font-weight-bold">@((p.UnitPrice * (1 - p.Discount/100.0))?.ToString("C0"))</td>
+                        <td class="text-danger font-weight-bold">@((p.UnitPrice * (1 - p.Discount / 100.0))?.ToString("C0"))</td>
                     }
                 </tr>
                 <tr>
-                    <td>Giảm giá</td>
+                    <td>Discount</td>
                     @foreach (var p in Model)
                     {
                         <td>@(p.Discount > 0 ? $"-{p.Discount}%" : "-")</td>
                     }
                 </tr>
                 <tr>
-                    <td>Mô tả</td>
+                    <td>Description</td>
                     @foreach (var p in Model)
                     {
                         <td>@p.Description</td>
                     }
                 </tr>
                 <tr>
-                    <td>Nhà cung cấp</td>
+                    <td>Supplier</td>
                     @foreach (var p in Model)
                     {
                         <td>@p.Supplier?.CompanyName</td>
@@ -68,4 +68,4 @@ else
         </table>
     </div>
 }
-<a href="@Url.Action("Index", "Product")" class="btn btn-secondary mt-3">Quay lại danh sách sản phẩm</a> 
+<a href="@Url.Action("Index", "Product")" class="btn btn-secondary mt-3">Back to product list</a>
