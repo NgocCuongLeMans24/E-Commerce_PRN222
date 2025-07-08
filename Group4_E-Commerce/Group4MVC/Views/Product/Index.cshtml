@@ -26,9 +26,9 @@
         <div class="col-lg-3 col-md-4">
             <form method="get" action="@Url.Action("Index", "Product")" class="mb-4">
                 <div class="form-group">
-                    <label for="categoryId">Loại hàng</label>
+                    <label for="categoryId">Category</label>
                     <select class="form-control" id="categoryId" name="categoryId">
-                        <option value="">Tất cả</option>
+                        <option value="">All</option>
                         @if (ViewBag.Categories != null)
                         {
                             foreach (var cat in ViewBag.Categories)
@@ -46,9 +46,9 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="supplierId">Nhà cung cấp</label>
+                    <label for="supplierId">Supplier</label>
                     <select class="form-control" id="supplierId" name="supplierId">
-                        <option value="">Tất cả</option>
+                        <option value="">All</option>
                         @if (ViewBag.Suppliers != null)
                         {
                             foreach (var sup in ViewBag.Suppliers)
@@ -66,10 +66,10 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="keyword">Từ khóa</label>
-                    <input type="text" class="form-control" id="keyword" name="keyword" value="@keyword" placeholder="Tìm kiếm..." />
+                    <label for="keyword">Keyword</label>
+                    <input type="text" class="form-control" id="keyword" name="keyword" value="@keyword" placeholder="Search..." />
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
             </form>
         </div>
 
@@ -105,185 +105,186 @@
 <!-- Shop End -->
 <div id="compare-float-btn" style="position:fixed;bottom:40px;right:40px;z-index:9999;display:none;">
     <button class="btn btn-primary btn-lg shadow" id="go-compare-btn">
-        🔄 Xem so sánh (<span id="compare-count">0</span>)
+        🔄 View Compare (<span id="compare-count">0</span>)
     </button>
 </div>
 @section Scripts {
-<script>
-    // Helper: get/set array from localStorage
-    function getList(key) {
-        return JSON.parse(localStorage.getItem(key) || '[]');
-    }
-    function setList(key, arr) {
-        localStorage.setItem(key, JSON.stringify(arr));
-    }
-
-    // Cập nhật trạng thái icon khi load trang hoặc sau khi ajax load
-    function updateIcons() {
-        var wishlist = getList('wishlist');
-        var compare = getList('compare');
-        $('.wishlist-btn').each(function () {
-            var pid = $(this).data('product-id');
-            if (wishlist.includes(pid)) {
-                $(this).addClass('active-wishlist').attr('title', 'Bỏ khỏi yêu thích').tooltip('dispose').tooltip();
-            } else {
-                $(this).removeClass('active-wishlist').attr('title', 'Yêu thích').tooltip('dispose').tooltip();
-            }
-        });
-        $('.compare-btn').each(function () {
-            var pid = $(this).data('product-id');
-            if (compare.includes(pid)) {
-                $(this).addClass('active-compare').attr('title', 'Bỏ khỏi so sánh').tooltip('dispose').tooltip();
-            } else {
-                $(this).removeClass('active-compare').attr('title', 'So sánh').tooltip('dispose').tooltip();
-            }
-        });
-        updateCompareBtn();
-    }
-
-    // Xử lý click wishlist
-    $(document).on('click', '.wishlist-btn', function (e) {
-        e.preventDefault();
-        var pid = $(this).data('product-id');
-        var wishlist = getList('wishlist');
-        if (wishlist.includes(pid)) {
-            wishlist = wishlist.filter(x => x !== pid);
-        } else {
-            wishlist.push(pid);
+    <script>
+        // Helper: get/set array from localStorage
+        function getList(key) {
+            return JSON.parse(localStorage.getItem(key) || '[]');
         }
-        setList('wishlist', wishlist);
-        updateIcons();
-    });
-
-    // Xử lý click compare
-    $(document).on('click', '.compare-btn', function (e) {
-        e.preventDefault();
-        var pid = $(this).data('product-id');
-        var compare = getList('compare');
-        if (compare.includes(pid)) {
-            compare = compare.filter(x => x !== pid);
-        } else {
-            if (compare.length >= 4) {
-                alert('Bạn chỉ có thể so sánh tối đa 4 sản phẩm!');
-                return;
-            }
-            compare.push(pid);
+        function setList(key, arr) {
+            localStorage.setItem(key, JSON.stringify(arr));
         }
-        setList('compare', compare);
-        updateIcons();
-    });
 
-    // Khi load trang, cập nhật icon
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-        updateIcons();
-    });
+        // Update icon state when page loads or after AJAX load
+        function updateIcons() {
+            var wishlist = getList('wishlist');
+            var compare = getList('compare');
+            $('.wishlist-btn').each(function () {
+                var pid = $(this).data('product-id');
+                if (wishlist.includes(pid)) {
+                    $(this).addClass('active-wishlist').attr('title', 'Remove from favorites').tooltip('dispose').tooltip();
+                } else {
+                    $(this).removeClass('active-wishlist').attr('title', 'Favorite').tooltip('dispose').tooltip();
+                }
+            });
+            $('.compare-btn').each(function () {
+                var pid = $(this).data('product-id');
+                if (compare.includes(pid)) {
+                    $(this).addClass('active-compare').attr('title', 'Remove from compare').tooltip('dispose').tooltip();
+                } else {
+                    $(this).removeClass('active-compare').attr('title', 'Compare').tooltip('dispose').tooltip();
+                }
+            });
+            updateCompareBtn();
+        }
 
-    // Gọi lại updateIcons sau mỗi lần ajax load (phân trang, lọc)
-    function afterAjaxProductList() {
-        $('[data-toggle="tooltip"]').tooltip();
-        updateIcons();
-    }
-
-    // Hook vào ajax load của phân trang/lọc
-    // (Tìm đoạn $.get hoặc ajax load sản phẩm, thêm afterAjaxProductList vào callback)
-    // Ví dụ:
-    // $.get(..., function(data) { $('#product-list-container').html(data); afterAjaxProductList(); });
-
-    // Nếu bạn dùng tên hàm khác, hãy thay thế cho đúng!
-
-    function loadProductsAjax(params, pushUrl = true) {
-        $.get('@Url.Action("AjaxList", "Product")', params, function (data) {
-            $('#product-list-container').html(data);
-            if (pushUrl) {
-                const url = new URL(window.location.href);
-                url.searchParams.set('categoryId', params.categoryId || '');
-                url.searchParams.set('supplierId', params.supplierId || '');
-                url.searchParams.set('keyword', params.keyword || '');
-                url.searchParams.set('page', params.page || 1);
-                window.history.pushState(params, '', url.pathname + url.search);
-            }
-            afterAjaxProductList();
-        });
-    }
-
-    $(document).on('click', '.page-ajax-link', function (e) {
-        e.preventDefault();
-        var page = $(this).data('page');
-        var categoryId = $('#categoryId').val();
-        var supplierId = $('#supplierId').val();
-        var keyword = $('#keyword').val();
-        loadProductsAjax({ categoryId, supplierId, keyword, page });
-    });
-
-    // AJAX cho form lọc
-    $(document).on('submit', 'form', function (e) {
-        if ($(this).find('#categoryId').length > 0) {
+        // Handle click wishlist
+        $(document).on('click', '.wishlist-btn', function (e) {
             e.preventDefault();
+            var pid = $(this).data('product-id');
+            var wishlist = getList('wishlist');
+            if (wishlist.includes(pid)) {
+                wishlist = wishlist.filter(x => x !== pid);
+            } else {
+                wishlist.push(pid);
+            }
+            setList('wishlist', wishlist);
+            updateIcons();
+        });
+
+        // Handle click compare
+        $(document).on('click', '.compare-btn', function (e) {
+            e.preventDefault();
+            var pid = $(this).data('product-id');
+            var compare = getList('compare');
+            if (compare.includes(pid)) {
+                compare = compare.filter(x => x !== pid);
+            } else {
+                if (compare.length >= 4) {
+                    alert('You can only compare up to 4 products!');
+                    return;
+                }
+                compare.push(pid);
+            }
+            setList('compare', compare);
+            updateIcons();
+        });
+
+        // When page loads, update icons
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            updateIcons();
+        });
+
+        // Re-run updateIcons after every AJAX product list load (pagination, filter)
+        function afterAjaxProductList() {
+            $('[data-toggle="tooltip"]').tooltip();
+            updateIcons();
+        }
+
+        // Hook into AJAX load for pagination/filter
+        // (Find the $.get or AJAX call that loads products, then add afterAjaxProductList in its callback)
+        // Example:
+        // $.get(..., function(data) { $('#product-list-container').html(data); afterAjaxProductList(); });
+
+        // If you use a different function name, change accordingly!
+
+        function loadProductsAjax(params, pushUrl = true) {
+            $.get('@Url.Action("AjaxList", "Product")', params, function (data) {
+                $('#product-list-container').html(data);
+                if (pushUrl) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('categoryId', params.categoryId || '');
+                    url.searchParams.set('supplierId', params.supplierId || '');
+                    url.searchParams.set('keyword', params.keyword || '');
+                    url.searchParams.set('page', params.page || 1);
+                    window.history.pushState(params, '', url.pathname + url.search);
+                }
+                afterAjaxProductList();
+            });
+        }
+
+        $(document).on('click', '.page-ajax-link', function (e) {
+            e.preventDefault();
+            var page = $(this).data('page');
             var categoryId = $('#categoryId').val();
             var supplierId = $('#supplierId').val();
             var keyword = $('#keyword').val();
-            loadProductsAjax({ categoryId, supplierId, keyword, page: 1 });
-        }
-    });
+            loadProductsAjax({ categoryId, supplierId, keyword, page });
+        });
 
-    // Lắng nghe back/forward
-    window.addEventListener('popstate', function (event) {
-        var params = event.state;
-        if (params) {
-            loadProductsAjax(params, false);
-        } else {
-            // Nếu không có state, lấy từ URL
+        // AJAX for filter form
+        $(document).on('submit', 'form', function (e) {
+            if ($(this).find('#categoryId').length > 0) {
+                e.preventDefault();
+                var categoryId = $('#categoryId').val();
+                var supplierId = $('#supplierId').val();
+                var keyword = $('#keyword').val();
+                loadProductsAjax({ categoryId, supplierId, keyword, page: 1 });
+            }
+        });
+
+        // Listen to back/forward
+        window.addEventListener('popstate', function (event) {
+            var params = event.state;
+            if (params) {
+                loadProductsAjax(params, false);
+            } else {
+                // If there is no state, read from URL
+                var url = new URL(window.location.href);
+                var categoryId = url.searchParams.get('categoryId') || '';
+                var supplierId = url.searchParams.get('supplierId') || '';
+                var keyword = url.searchParams.get('keyword') || '';
+                var page = url.searchParams.get('page') || 1;
+                loadProductsAjax({ categoryId, supplierId, keyword, page }, false);
+            }
+        });
+
+        // When page loads, if there is query string then automatically load correct state (only when not first page)
+        $(document).ready(function () {
             var url = new URL(window.location.href);
-            var categoryId = url.searchParams.get('categoryId') || '';
-            var supplierId = url.searchParams.get('supplierId') || '';
-            var keyword = url.searchParams.get('keyword') || '';
-            var page = url.searchParams.get('page') || 1;
-            loadProductsAjax({ categoryId, supplierId, keyword, page }, false);
-        }
-    });
+            var hasQuery = url.search.length > 0;
+            if (hasQuery) {
+                var categoryId = url.searchParams.get('categoryId') || '';
+                var supplierId = url.searchParams.get('supplierId') || '';
+                var keyword = url.searchParams.get('keyword') || '';
+                var page = url.searchParams.get('page') || 1;
+                loadProductsAjax({ categoryId, supplierId, keyword, page }, false);
+            }
+        });
 
-    // Khi load trang, nếu có query string thì tự động load đúng trạng thái (chỉ khi không phải trang đầu)
-    $(document).ready(function () {
-        var url = new URL(window.location.href);
-        var hasQuery = url.search.length > 0;
-        if (hasQuery) {
-            var categoryId = url.searchParams.get('categoryId') || '';
-            var supplierId = url.searchParams.get('supplierId') || '';
-            var keyword = url.searchParams.get('keyword') || '';
-            var page = url.searchParams.get('page') || 1;
-            loadProductsAjax({ categoryId, supplierId, keyword, page }, false);
+        // Show floating Compare button if there are selected products
+        function updateCompareBtn() {
+            var compare = getList('compare');
+            if (compare.length > 0) {
+                $('#compare-float-btn').show();
+                $('#compare-count').text(compare.length);
+            } else {
+                $('#compare-float-btn').hide();
+            }
         }
-    });
 
-    // Hiển thị nút nổi Xem so sánh nếu có sản phẩm được chọn
-    function updateCompareBtn() {
-        var compare = getList('compare');
-        if (compare.length > 0) {
-            $('#compare-float-btn').show();
-            $('#compare-count').text(compare.length);
-        } else {
-            $('#compare-float-btn').hide();
+        // When clicking the "Compare" button
+        $(document).on('click', '#go-compare-btn', function () {
+            var compare = getList('compare');
+            if (compare.length === 0) return;
+            window.location.href = '/Product/Compare?ids=' + compare.join(',');
+        });
+    </script>
+    <style>
+        .active-wishlist {
+            color: #dc3545 !important;
+            background: #ffe6ea !important;
+            border-color: #dc3545 !important;
         }
-    }
 
-    // Khi bấm nút Xem so sánh
-    $(document).on('click', '#go-compare-btn', function () {
-        var compare = getList('compare');
-        if (compare.length === 0) return;
-        window.location.href = '/Product/Compare?ids=' + compare.join(',');
-    });
-</script>
-<style>
-    .active-wishlist {
-        color: #dc3545 !important;
-        background: #ffe6ea !important;
-        border-color: #dc3545 !important;
-    }
-    .active-compare {
-        color: #007bff !important;
-        background: #e6f0ff !important;
-        border-color: #007bff !important;
-    }
-</style>
+        .active-compare {
+            color: #007bff !important;
+            background: #e6f0ff !important;
+            border-color: #007bff !important;
+        }
+    </style>
 }
