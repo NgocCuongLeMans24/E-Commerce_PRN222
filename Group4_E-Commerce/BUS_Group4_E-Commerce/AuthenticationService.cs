@@ -1,0 +1,61 @@
+﻿using DAL_Group4_E_Commerce.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BUS_Group4_E_Commerce
+{
+    public class AuthenticationService : IAuthenticationService
+    {
+        private readonly ICustomerService _customerService;
+        private readonly IEmployeeService _employeeService;
+        private readonly IPasswordHashingService _passwordHashingService;
+
+        public AuthenticationService(
+            ICustomerService customerService,
+            IEmployeeService employeeService,
+            IPasswordHashingService passwordHashingService)
+        {
+            _customerService = customerService;
+            _employeeService = employeeService;
+            _passwordHashingService = passwordHashingService;
+        }
+
+        public async Task<Customer?> AuthenticateCustomerAsync(string email, string password)
+        {
+            var customer = await _customerService.GetCustomerByEmailAsync(email);
+
+            if (customer != null && (bool)customer.IsActive && !string.IsNullOrEmpty(customer.Password))
+            {
+                if (_passwordHashingService.VerifyPassword(password, customer.Password))
+                {
+                    return customer;
+                }
+            }
+
+            return null;
+        }
+
+        public async Task<Employee?> AuthenticateEmployeeAsync(string email, string password)
+        {
+            var employee = await _employeeService.GetEmployeeByEmailAsync(email);
+
+            if (employee != null && !string.IsNullOrEmpty(employee.Password))
+            {
+                if (_passwordHashingService.VerifyPassword(password, employee.Password))
+                {
+                    return employee;
+                }
+            }
+
+            return null;
+        }
+
+        public async Task<bool> RegisterCustomerAsync(Customer customer)
+        {
+            return await _customerService.RegisterCustomerAsync(customer);
+        }
+    }
+}

@@ -1,0 +1,171 @@
+﻿@model ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+        <link rel="stylesheet" href="~/css/login.css" />
+}
+
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Logo/Brand Section -->
+        <div class="brand-section">
+            <div class="brand-logo">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
+            <h2 class="brand-title">Welcome Back</h2>
+            <p class="brand-subtitle">Sign in to your account to continue</p>
+        </div>
+
+        <!-- Login Form Card -->
+        <div class="form-card" id="form-card">
+            <form asp-action="Login" asp-controller="Account" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <!-- Error Messages -->
+                <div asp-validation-summary="All" class="error-message" id="error-container" style="display: none;"></div>
+
+                <!-- User Type Selection -->
+                <div class="form-group">
+                    <label asp-for="UserType" class="form-label">Login as</label>
+                    <div class="select-wrapper">
+                        <select asp-for="UserType" class="form-select">
+                            <option value="Customer">🛍️ Customer</option>
+                            <option value="Employee">👨‍💼 Employee</option>
+                        </select>
+                        <div class="select-arrow">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <span asp-validation-for="UserType" class="validation-error"></span>
+                </div>
+
+                <!-- Email Input -->
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                        </div>
+                        <input asp-for="Email" type="email" autocomplete="email" class="form-input" placeholder="Enter your email address">
+                    </div>
+                    <span asp-validation-for="Email" class="validation-error"></span>
+                </div>
+
+                <!-- Password Input -->
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <div class="input-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <input asp-for="Password" type="password" autocomplete="current-password" class="form-input" placeholder="Enter your password">
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" id="eye-icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="validation-error"></span>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="remember-forgot">
+                    <div class="checkbox-wrapper">
+                        <input asp-for="RememberMe" type="checkbox" class="form-checkbox">
+                        <label asp-for="RememberMe" class="checkbox-label">Remember me</label>
+                    </div>
+                    <a href="@Url.Action("ForgotPassword", "Account")" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">
+                    <span class="btn-icon">
+                        @* <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"> *@
+                        @*     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path> *@
+                        @* </svg> *@
+                    </span>
+                    Sign In
+                </button>
+
+                <!-- Register Link -->
+                <div class="register-link">
+                    <p class="register-text">
+                        Don't have an account?
+                        <a href="@Url.Action("Register", "Account")">Create account here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-text">
+            <p>© 2024 Your Ecommerce Store. All rights reserved.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+        <script>
+            // Password visibility toggle
+            function togglePassword() {
+                const passwordInput = document.querySelector('input[name="Password"]');
+                const eyeIcon = document.getElementById('eye-icon');
+
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIcon.innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+                    `;
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIcon.innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    `;
+                }
+            }
+
+            // Form animation on load
+            document.addEventListener('DOMContentLoaded', function() {
+                const formCard = document.getElementById('form-card');
+
+                setTimeout(() => {
+                    formCard.classList.add('loaded');
+                }, 100);
+
+                // Show error container if there are validation errors
+                const errorContainer = document.getElementById('error-container');
+                const errorMessages = document.querySelectorAll('[data-valmsg-summary="true"] li');
+                const hasErrors = Array.from(errorMessages).some(li => li.textContent.trim() !== '');
+
+                errorContainer.style.display = hasErrors ? 'block' : 'none';
+            });
+
+            // Input focus animations
+            document.querySelectorAll('.form-input, .form-select').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('input-focus');
+                });
+
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('input-focus');
+                });
+            });
+        </script>
+}

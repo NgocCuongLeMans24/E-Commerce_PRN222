@@ -23,6 +23,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="~/css/style.css" rel="stylesheet">
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <div>
@@ -88,6 +89,24 @@
                                     <i class="fas fa-shopping-cart text-primary"></i>
                                     <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
                                 </a>
+                                <a href="@Url.Action("Index", "Profile")" class="btn px-0 ml-3">
+                                    <i class="fas fa-user text-primary"></i>
+                                </a>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <form asp-action="Logout" asp-controller="Account" method="post" class="d-inline">
+                                        <button type="submit" class="btn px-0 ml-3" title="Logout">
+                                            <i class="fas fa-sign-out-alt text-primary"></i>
+                                        </button>
+                                    </form>
+                                }
+                                @if (User.Identity?.IsAuthenticated == false)
+                                {
+                                    <a href="@Url.Action("Login", "Account")" class="btn px-0 ml-3" title="Login">
+                                        <i class="fas fa-sign-in-alt text-primary"></i>
+                                    </a>
+                                }
+                                
                             </div>
                         </div>
                     </nav>
@@ -119,5 +138,7 @@
 
     <!-- Template Javascript -->
     <script src="~/js/main.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

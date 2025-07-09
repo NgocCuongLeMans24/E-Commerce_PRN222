@@ -1,0 +1,188 @@
+﻿@model ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<link rel="stylesheet" href="~/css/admin.css" />
+}
+
+<div class="dashboard-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">🎛️ Admin Dashboard</h1>
+            <p class="dashboard-subtitle">Manage your e-commerce platform</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Total Customers</div>
+                        <div class="stat-value">@Model.TotalCustomers</div>
+                        <div class="stat-change">@Model.ActiveCustomers active</div>
+                    </div>
+                    <div class="stat-icon customers">👥</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Total Employees</div>
+                        <div class="stat-value">@Model.TotalEmployees</div>
+                        <div class="stat-change">All active</div>
+                    </div>
+                    <div class="stat-icon employees">👨‍💼</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Total Orders</div>
+                        <div class="stat-value">@Model.TotalOrders</div>
+                        <div class="stat-change">Coming soon</div>
+                    </div>
+                    <div class="stat-icon orders">📦</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Total Products</div>
+                        <div class="stat-value">@Model.TotalProducts</div>
+                        <div class="stat-change">Coming soon</div>
+                    </div>
+                    <div class="stat-icon products">🛍️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon customers">👥</div>
+                    <div class="action-title">Customer Management</div>
+                </div>
+                <div class="action-buttons">
+                    <button type="button" class="btn-action" onclick="openCustomerModal()">
+                        ➕ Add Customer
+                    </button>
+                    <a href="@Url.Action("Customers", "Admin")" class="btn-secondary">
+                        📋 View All Customers
+                    </a>
+                </div>
+            </div>
+
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon employees">👨‍💼</div>
+                    <div class="action-title">Employee Management</div>
+                </div>
+                <div class="action-buttons">
+                    <button type="button" class="btn-action" onclick="openEmployeeModal()">
+                        ➕ Add Employee
+                    </button>
+                    <a href="@Url.Action("Employees", "Admin")" class="btn-secondary">
+                        📋 View All Employees
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-section">
+            <div class="recent-card">
+                <div class="recent-header">
+                    <div class="stat-icon customers">👥</div>
+                    <div class="recent-title">Recent Customers</div>
+                </div>
+                <ul class="recent-list">
+                    @foreach (var customer in Model.RecentCustomers)
+                    {
+                        <li class="recent-item">
+                            <div class="recent-avatar">
+                                @* @if (!string.IsNullOrEmpty(customer.Photo) && customer.Photo != "default-avatar") *@
+                                @* { *@
+                                @*         <img src="@customer.Photo" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"> *@
+                                @* } *@
+                                @* else *@
+                                @* { *@
+                                    @customer.FullName.Substring(0, 1).ToUpper()
+                                @* } *@
+                                
+                            </div>
+                            <div class="recent-info">
+                                <div class="recent-name">@customer.FullName</div>
+                                <div class="recent-email">@customer.Email</div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="recent-card">
+                <div class="recent-header">
+                    <div class="stat-icon employees">👨‍💼</div>
+                    <div class="recent-title">Recent Employees</div>
+                </div>
+                <ul class="recent-list">
+                    @foreach (var employee in Model.RecentEmployees)
+                    {
+                        <li class="recent-item">
+                            <div class="recent-avatar">
+                                @employee.FullName.Substring(0, 1).ToUpper()
+                            </div>
+                            <div class="recent-info">
+                                <div class="recent-name">@employee.FullName</div>
+                                <div class="recent-email">@employee.Email</div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modalContainer"></div>
+
+@section Scripts {
+    <script>
+        function openCustomerModal(customerId = null) {
+            fetch(`@Url.Action("GetCustomerModal", "Admin")?id=${customerId || ''}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modalContainer').innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+                    modal.show();
+                    //$('#customerModal').modal('show');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to load customer form.');
+                });
+        }
+
+        function openEmployeeModal(employeeId = null) {
+            fetch(`@Url.Action("GetEmployeeModal", "Admin")?id=${employeeId || ''}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modalContainer').innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to load employee form.');
+                });
+        }
+    </script>
+}

@@ -1,4 +1,7 @@
-﻿using DAL_Group4_E_Commerce.Models;
+using DAL_Group4_E_Commerce.Models;
+using BUS_Group4_E_Commerce;
+using DAL_Group4_E_Commerce.Repository;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group4MVC
@@ -22,6 +25,37 @@ namespace Group4MVC
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+            // Add Authentication Services
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    options.SlidingExpiration = true;
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                });
+
+            // Register Repositories
+            builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+            builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
+            // Register Services
+            builder.Services.AddScoped<IPasswordHashingService, PasswordHashingService>();
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
+            builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddSingleton<IOtpService, OtpService>();
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("CustomerOnly", policy => policy.RequireClaim("UserType", "Customer"));
+                options.AddPolicy("EmployeeOnly", policy => policy.RequireClaim("UserType", "Employee"));
+            });
 
             var app = builder.Build();
 
@@ -40,6 +74,7 @@ namespace Group4MVC
 
             app.UseSession();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

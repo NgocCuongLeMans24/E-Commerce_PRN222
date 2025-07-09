@@ -18,6 +18,7 @@
         .footer-main .social-icons a { color: #fff; margin: 0 0.5em; font-size: 1.2em; }
         .footer-main .social-icons a:hover { color: #ffc107; }
     </style>
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <header>
@@ -39,6 +40,23 @@
                     <div class="d-flex align-items-center">
                         @await Component.InvokeAsync("Cart")
                     </div>
+                    <a href="@Url.Action("Index", "Profile")" class="btn px-0 ml-3">
+                            <i class="fas fa-user text-primary"></i>
+                        </a>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-action="Logout" asp-controller="Account" method="post" class="d-inline">
+                            <button type="submit" class="btn px-0 ml-3" title="Logout">
+                                <i class="fas fa-sign-out-alt text-primary"></i>
+                            </button>
+                        </form>
+                    }
+                    @if (User.Identity?.IsAuthenticated == false)
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn px-0 ml-3" title="Login">
+                            <i class="fas fa-sign-in-alt text-primary"></i>
+                        </a>
+                    }
                 </div>
             </div>
         </nav>
