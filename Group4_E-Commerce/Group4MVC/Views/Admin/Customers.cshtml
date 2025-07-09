@@ -1,0 +1,236 @@
+﻿@model ViewModels.CustomerManagementViewModel
+@{
+    ViewData["Title"] = "Customer Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+        <link rel="stylesheet" href="~/css/customer-management/index.css" />
+}
+
+<div class="management-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="management-header">
+            <h1 class="page-title">👥 Customer Management</h1>
+            <button type="button" class="btn-primary" onclick="openCustomerModal()">
+                ➕ Add New Customer
+            </button>
+        </div>
+
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+                <div class="success-message">
+                    ✅ @TempData["SuccessMessage"]
+                </div>
+        }
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <form method="get" asp-action="Customers">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label class="form-label">Search</label>
+                        <input asp-for="SearchTerm" class="form-input" placeholder="Search by name, email, or ID...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select asp-for="StatusFilter" class="form-select">
+                            <option value="All">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Sort By</label>
+                        <select asp-for="SortBy" class="form-select">
+                            <option value="FullName">Name</option>
+                            <option value="Email">Email</option>
+                            <option value="BirthDate">Birth Date</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Order</label>
+                        <select asp-for="SortOrder" class="form-select">
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn-secondary">🔍 Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Customers Table -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="customers-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Gender</th>
+                            <th>Birth Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var customer in Model.Customers)
+                        {
+                                <tr>
+                                    <td>
+                                        <div class="customer-info">
+                                            <div class="customer-avatar">
+                                            @customer.FullName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <div class="customer-details">
+                                                <div class="customer-name">@customer.FullName</div>
+                                                <div class="customer-id">@customer.CustomerId</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@customer.Email</td>
+                                    <td>@(customer.Phone ?? "N/A")</td>
+                                    <td>
+                                        <span class="gender-badge @((bool)customer.Gender ? "gender-female" : "gender-male")">
+                                        @((bool)customer.Gender ? "👩 Female" : "👨 Male")
+                                        </span>
+                                    </td>
+                                    <td>@customer.BirthDate?.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <span class="status-badge @((bool)customer.IsActive ? "status-active" : "status-inactive")">
+                                        @((bool)customer.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button type="button" class="btn-sm btn-edit" onclick="openCustomerModal('@customer.CustomerId')">
+                                                ✏️ Edit
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn-sm btn-toggle @((bool)customer.IsActive ? "deactivate" : "")"
+                                                    onclick="toggleCustomerStatus('@customer.CustomerId', @customer.IsActive.ToString().ToLower())">
+                                            @((bool)customer.IsActive ? "🚫 Deactivate" : "✅ Activate")
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalCount > Model.PageSize)
+            {
+                    <div class="pagination">
+                    @{
+                        var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+                        var currentPage = Model.PageNumber;
+                    }
+
+                    @if (currentPage > 1)
+                    {
+                                <a href="@Url.Action("Customers", new { 
+                            pageNumber = currentPage - 1, 
+                            pageSize = Model.PageSize,
+                            searchTerm = Model.SearchTerm,
+                            statusFilter = Model.StatusFilter,
+                            sortBy = Model.SortBy,
+                            sortOrder = Model.SortOrder
+                        })">← Previous</a>
+                    }
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        if (i == currentPage)
+                        {
+                                        <span class="current">@i</span>
+                        }
+                        else
+                        {
+                                        <a href="@Url.Action("Customers", new { 
+                                pageNumber = i, 
+                                pageSize = Model.PageSize,
+                                searchTerm = Model.SearchTerm,
+                                statusFilter = Model.StatusFilter,
+                                sortBy = Model.SortBy,
+                                sortOrder = Model.SortOrder
+                            })">@i</a>
+                        }
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                                <a href="@Url.Action("Customers", new { 
+                            pageNumber = currentPage + 1, 
+                            pageSize = Model.PageSize,
+                            searchTerm = Model.SearchTerm,
+                            statusFilter = Model.StatusFilter,
+                            sortBy = Model.SortBy,
+                            sortOrder = Model.SortOrder
+                        })">Next →</a>
+                    }
+                    </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modalContainer"></div>
+
+@section Scripts {
+        <script>
+            function openCustomerModal(customerId = null) {
+                fetch(`@Url.Action("GetCustomerModal", "Admin")?id=${customerId || ''}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('modalContainer').innerHTML = html;
+                        const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to load customer form.');
+                    });
+            }
+
+            function toggleCustomerStatus(customerId, isActive) {
+                const action = isActive ? 'deactivate' : 'activate';
+                const confirmMessage = `Are you sure you want to ${action} this customer?`;
+
+                if (confirm(confirmMessage)) {
+                    fetch('@Url.Action("ToggleCustomerStatus", "Admin")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `id=${encodeURIComponent(customerId)}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while updating the customer status.');
+                    });
+                }
+            }
+        </script>
+}

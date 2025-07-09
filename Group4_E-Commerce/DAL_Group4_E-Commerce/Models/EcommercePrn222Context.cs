@@ -108,13 +108,13 @@ public partial class EcommercePrn222Context : DbContext
             entity.Property(e => e.FullName).HasMaxLength(50);
             entity.Property(e => e.Gender).HasDefaultValue(false);
             entity.Property(e => e.IsActive).HasDefaultValue(false);
-            entity.Property(e => e.Password).HasMaxLength(50);
+            entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Phone).HasMaxLength(24);
             entity.Property(e => e.Photo)
                 .HasMaxLength(50)
                 .HasDefaultValue("Photo.gif");
             entity.Property(e => e.RandomKey)
-                .HasMaxLength(50)
+                .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.Role).HasDefaultValue(0);
         });
@@ -135,7 +135,7 @@ public partial class EcommercePrn222Context : DbContext
                 .HasColumnName("EmployeeID");
             entity.Property(e => e.Email).HasMaxLength(50);
             entity.Property(e => e.FullName).HasMaxLength(50);
-            entity.Property(e => e.Password).HasMaxLength(50);
+            entity.Property(e => e.Password).HasMaxLength(255);
         });
 
         modelBuilder.Entity<Favorite>(entity =>

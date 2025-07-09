@@ -1,0 +1,212 @@
+﻿@model ViewModels.EmployeeManagementViewModel
+@{
+    ViewData["Title"] = "Employee Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+        <link rel="stylesheet" href="~/css/employee-management/index.css" />
+}
+
+<div class="management-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="management-header">
+            <h1 class="page-title">👨‍💼 Employee Management</h1>
+            <button type="button" class="btn-primary" onclick="openEmployeeModal()">
+                ➕ Add New Employee
+            </button>
+        </div>
+
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+                <div class="success-message">
+                    ✅ @TempData["SuccessMessage"]
+                </div>
+        }
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <form method="get" asp-action="Employees">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label class="form-label">Search</label>
+                        <input asp-for="SearchTerm" class="form-input" placeholder="Search by name, email, or ID...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Sort By</label>
+                        <select asp-for="SortBy" class="form-select">
+                            <option value="FullName">Name</option>
+                            <option value="Email">Email</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Order</label>
+                        <select asp-for="SortOrder" class="form-select">
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn-secondary">🔍 Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Employees Table -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="employees-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var employee in Model.Employees)
+                        {
+                                <tr>
+                                    <td>
+                                        <div class="employee-info">
+                                            <div class="employee-avatar">
+                                            @employee.FullName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <div class="employee-details">
+                                                <div class="employee-name">@employee.FullName</div>
+                                                <div class="employee-id">@employee.EmployeeId</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@employee.Email</td>
+                                    <td>
+                                        <span class="role-badge">
+                                            👨‍💼 Employee
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button type="button" class="btn-sm btn-edit" onclick="openEmployeeModal('@employee.EmployeeId')">
+                                                ✏️ Edit
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn-sm btn-delete"
+                                                    onclick="deleteEmployee('@employee.EmployeeId', '@employee.FullName')">
+                                                🗑️ Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalCount > Model.PageSize)
+            {
+                    <div class="pagination">
+                    @{
+                        var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+                        var currentPage = Model.PageNumber;
+                    }
+
+                    @if (currentPage > 1)
+                    {
+                                <a href="@Url.Action("Employees", new { 
+                            pageNumber = currentPage - 1, 
+                            pageSize = Model.PageSize,
+                            searchTerm = Model.SearchTerm,
+                            sortBy = Model.SortBy,
+                            sortOrder = Model.SortOrder
+                        })">← Previous</a>
+                    }
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        if (i == currentPage)
+                        {
+                                        <span class="current">@i</span>
+                        }
+                        else
+                        {
+                                        <a href="@Url.Action("Employees", new { 
+                                pageNumber = i, 
+                                pageSize = Model.PageSize,
+                                searchTerm = Model.SearchTerm,
+                                sortBy = Model.SortBy,
+                                sortOrder = Model.SortOrder
+                            })">@i</a>
+                        }
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                                <a href="@Url.Action("Employees", new { 
+                            pageNumber = currentPage + 1, 
+                            pageSize = Model.PageSize,
+                            searchTerm = Model.SearchTerm,
+                            sortBy = Model.SortBy,
+                            sortOrder = Model.SortOrder
+                        })">Next →</a>
+                    }
+                    </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modalContainer"></div>
+
+@section Scripts {
+        <script>
+            function openEmployeeModal(employeeId = null) {
+                fetch(`@Url.Action("GetEmployeeModal", "Admin")?id=${employeeId || ''}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('modalContainer').innerHTML = html;
+                        const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to load employee form.');
+                    });
+            }
+
+            function deleteEmployee(employeeId, employeeName) {
+                const confirmMessage = `Are you sure you want to delete employee "${employeeName}"? This action cannot be undone.`;
+
+                if (confirm(confirmMessage)) {
+                    fetch('@Url.Action("DeleteEmployee", "Admin")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `id=${encodeURIComponent(employeeId)}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the employee.');
+                    });
+                }
+            }
+        </script>
+}

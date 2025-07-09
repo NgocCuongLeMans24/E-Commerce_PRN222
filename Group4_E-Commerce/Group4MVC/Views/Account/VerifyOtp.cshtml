@@ -1,0 +1,456 @@
+﻿@model ViewModels.VerifyOtpViewModel
+@{
+    ViewData["Title"] = "Verify OTP";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .verify-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 50%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+    }
+
+    .verify-wrapper {
+        max-width: 28rem;
+        width: 100%;
+    }
+
+    .brand-section {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .brand-logo {
+        margin: 0 auto 1rem;
+        height: 4rem;
+        width: 4rem;
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+    }
+
+    .brand-logo svg {
+        height: 2rem;
+        width: 2rem;
+        color: white;
+    }
+
+    .brand-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0.5rem;
+    }
+
+    .brand-subtitle {
+        color: #6b7280;
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s ease-out;
+    }
+
+    .form-card.loaded {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .otp-input-container {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 2rem 0;
+    }
+
+    .otp-input {
+        width: 3rem;
+        height: 3rem;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        background-color: #f9fafb;
+        color: #111827;
+        transition: all 0.2s ease;
+    }
+
+    .otp-input:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        background-color: white;
+    }
+
+    .otp-input.filled {
+        border-color: #8b5cf6;
+        background-color: #f3f4f6;
+    }
+
+    .hidden-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .submit-btn {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        color: white;
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        margin-top: 1.5rem;
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-icon {
+        position: absolute;
+        left: 0.75rem;
+        height: 1.25rem;
+        width: 1.25rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .resend-section {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .resend-text {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+    }
+
+    .resend-btn {
+        background: none;
+        border: none;
+        color: #8b5cf6;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 0.875rem;
+        transition: color 0.2s ease;
+    }
+
+    .resend-btn:hover {
+        color: #7c3aed;
+    }
+
+    .resend-btn:disabled {
+        color: #9ca3af;
+        cursor: not-allowed;
+        text-decoration: none;
+    }
+
+    .timer {
+        font-weight: 600;
+        color: #f59e0b;
+    }
+
+    .back-link {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .back-text {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .back-text a {
+        font-weight: 600;
+        color: #8b5cf6;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .back-text a:hover {
+        color: #7c3aed;
+    }
+
+    .error-message {
+        background-color: #fef2f2;
+        border-left: 4px solid #f87171;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+        display: none;
+    }
+
+    .validation-error {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        text-align: center;
+    }
+
+    .info-box {
+        background-color: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-text {
+        color: #1e40af;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+</style>
+
+<div class="verify-container">
+    <div class="verify-wrapper">
+        <!-- Logo/Brand Section -->
+        <div class="brand-section">
+            <div class="brand-logo">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h2 class="brand-title">Verify OTP</h2>
+            <p class="brand-subtitle">Enter the 6-digit code sent to your email</p>
+        </div>
+
+        <!-- OTP Verification Form Card -->
+        <div class="form-card" id="form-card">
+            <div class="info-box">
+                <p class="info-text">
+                    📧 We've sent a 6-digit OTP to <strong>@Model.Email</strong>
+                </p>
+            </div>
+
+            <form asp-action="VerifyOtp" asp-controller="Account" method="post">
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="UserType" />
+
+                <!-- Error Messages -->
+                <div asp-validation-summary="All" class="error-message" id="error-container"></div>
+
+                <!-- OTP Input -->
+                <div class="form-group">
+                    <label class="form-label">Enter 6-Digit OTP</label>
+                    <div class="otp-input-container">
+                        <input type="text" class="otp-input" maxlength="1" data-index="0">
+                        <input type="text" class="otp-input" maxlength="1" data-index="1">
+                        <input type="text" class="otp-input" maxlength="1" data-index="2">
+                        <input type="text" class="otp-input" maxlength="1" data-index="3">
+                        <input type="text" class="otp-input" maxlength="1" data-index="4">
+                        <input type="text" class="otp-input" maxlength="1" data-index="5">
+                    </div>
+                    <input type="hidden" asp-for="Otp" id="otp-hidden" class="hidden-input" />
+                    <span asp-validation-for="Otp" class="validation-error"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="verify-btn" disabled>
+                    <span class="btn-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </span>
+                    Verify OTP
+                </button>
+
+                <!-- Resend Section -->
+                <div class="resend-section">
+                    <p class="resend-text">Didn't receive the code?</p>
+                    <button type="button" class="resend-btn" id="resend-btn" disabled>
+                        Resend OTP in <span class="timer" id="timer">60</span>s
+                    </button>
+                </div>
+
+                <!-- Back Link -->
+                <div class="back-link">
+                    <p class="back-text">
+                        <a href="@Url.Action("ForgotPassword", "Account")">← Back to Forgot Password</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const formCard = document.getElementById('form-card');
+                const otpInputs = document.querySelectorAll('.otp-input');
+                const hiddenInput = document.getElementById('otp-hidden');
+                const verifyBtn = document.getElementById('verify-btn');
+                const resendBtn = document.getElementById('resend-btn');
+                const timerElement = document.getElementById('timer');
+
+                let timeLeft = 60;
+
+                // Form animation
+                setTimeout(() => {
+                    formCard.classList.add('loaded');
+                }, 100);
+
+                // OTP input handling
+                otpInputs.forEach((input, index) => {
+                    input.addEventListener('input', function(e) {
+                        const value = e.target.value;
+
+                        // Only allow numbers
+                        if (!/^\d*$/.test(value)) {
+                            e.target.value = '';
+                            return;
+                        }
+
+                        if (value) {
+                            e.target.classList.add('filled');
+                            // Move to next input
+                            if (index < otpInputs.length - 1) {
+                                otpInputs[index + 1].focus();
+                            }
+                        } else {
+                            e.target.classList.remove('filled');
+                        }
+
+                        updateOtpValue();
+                    });
+
+                    input.addEventListener('keydown', function(e) {
+                        // Handle backspace
+                        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                            otpInputs[index - 1].focus();
+                            otpInputs[index - 1].value = '';
+                            otpInputs[index - 1].classList.remove('filled');
+                            updateOtpValue();
+                        }
+
+                        // Handle paste
+                        if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+                            setTimeout(() => {
+                                const pastedValue = e.target.value;
+                                if (pastedValue.length >= 6) {
+                                    distributeOtp(pastedValue.substring(0, 6));
+                                }
+                            }, 10);
+                        }
+                    });
+
+                    input.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        const pastedData = e.clipboardData.getData('text');
+                        if (/^\d{6}$/.test(pastedData)) {
+                            distributeOtp(pastedData);
+                        }
+                    });
+                });
+
+                function distributeOtp(otpValue) {
+                    for (let i = 0; i < 6 && i < otpValue.length; i++) {
+                        otpInputs[i].value = otpValue[i];
+                        otpInputs[i].classList.add('filled');
+                    }
+                    updateOtpValue();
+                }
+
+                function updateOtpValue() {
+                    const otpValue = Array.from(otpInputs).map(input => input.value).join('');
+                    hiddenInput.value = otpValue;
+                    verifyBtn.disabled = otpValue.length !== 6;
+                }
+
+                // Countdown timer
+                function startTimer() {
+                    const interval = setInterval(() => {
+                        timeLeft--;
+                        timerElement.textContent = timeLeft;
+
+                        if (timeLeft <= 0) {
+                            clearInterval(interval);
+                            resendBtn.disabled = false;
+                            resendBtn.innerHTML = 'Resend OTP';
+                        }
+                    }, 1000);
+                }
+
+                // Start timer on page load
+                startTimer();
+
+                // Resend OTP functionality
+                resendBtn.addEventListener('click', function() {
+                    // In a real application, you would make an AJAX call to resend OTP
+                    alert('OTP resent! (This is a demo - check console for OTP)');
+                    timeLeft = 60;
+                    resendBtn.disabled = true;
+                    resendBtn.innerHTML = 'Resend OTP in <span class="timer" id="timer">60</span>s';
+                    timerElement = document.getElementById('timer');
+                    startTimer();
+                });
+
+                // Show error container if there are validation errors
+                const errorContainer = document.getElementById('error-container');
+                const errorMessages = document.querySelectorAll('[data-valmsg-summary="true"] li');
+                const hasErrors = Array.from(errorMessages).some(li => li.textContent.trim() !== '');
+
+                errorContainer.style.display = hasErrors ? 'block' : 'none';
+
+                // Focus first input
+                otpInputs[0].focus();
+            });
+        </script>
+}
