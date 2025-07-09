@@ -1,4 +1,4 @@
-using DAL_Group4_E_Commerce.Models;
+﻿using DAL_Group4_E_Commerce.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group4MVC
@@ -14,8 +14,16 @@ namespace Group4MVC
 
 			builder.Services.AddDbContext<EcommercePrn222Context>(options =>
 	        options.UseSqlServer(builder.Configuration.GetConnectionString("DB")));
+            builder.Services.AddDistributedMemoryCache();
 
-			var app = builder.Build();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(600); // phiên giỏ hàng sống 10 phút
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -30,11 +38,13 @@ namespace Group4MVC
 
             app.UseRouting();
 
+            app.UseSession();
+
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Product}/{action=Index}/{id?}");
 
             app.Run();
         }
