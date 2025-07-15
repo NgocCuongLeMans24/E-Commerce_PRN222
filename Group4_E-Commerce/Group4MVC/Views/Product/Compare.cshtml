@@ -3,69 +3,301 @@
     ViewData["Title"] = "Product Comparison";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2 class="my-4">Product Comparison</h2>
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-warning">No products to compare.</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-compare.css" />
 }
-else
-{
-    <div class="table-responsive">
-        <table class="table table-bordered text-center align-middle">
-            <thead class="thead-light">
-                <tr>
-                    <th>Attribute</th>
-                    @foreach (var p in Model)
-                    {
-                        <th>@p.ProductName</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Image</td>
-                    @foreach (var p in Model)
-                    {
-                        <td><img src="@p.Image" alt="@p.ProductName" style="max-width:100px;max-height:100px;"></td>
-                    }
-                </tr>
-                <tr>
-                    <td>Original Price</td>
-                    @foreach (var p in Model)
-                    {
-                        <td>@p.UnitPrice?.ToString("C0")</td>
-                    }
-                </tr>
-                <tr>
-                    <td>Discounted Price</td>
-                    @foreach (var p in Model)
-                    {
-                        <td class="text-danger font-weight-bold">@((p.UnitPrice * (1 - p.Discount / 100.0))?.ToString("C0"))</td>
-                    }
-                </tr>
-                <tr>
-                    <td>Discount</td>
-                    @foreach (var p in Model)
-                    {
-                        <td>@(p.Discount > 0 ? $"-{p.Discount}%" : "-")</td>
-                    }
-                </tr>
-                <tr>
-                    <td>Description</td>
-                    @foreach (var p in Model)
-                    {
-                        <td>@p.Description</td>
-                    }
-                </tr>
-                <tr>
-                    <td>Supplier</td>
-                    @foreach (var p in Model)
-                    {
-                        <td>@p.Supplier?.CompanyName</td>
-                    }
-                </tr>
-            </tbody>
-        </table>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-section">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="/Product">Products</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Compare Products</li>
+            </ol>
+        </nav>
     </div>
+</div>
+
+<!-- Compare Section -->
+<div class="compare-section">
+    <div class="container">
+        <div class="compare-header">
+            <h1 class="page-title">
+                <i class="fas fa-balance-scale"></i>
+                Product Comparison
+            </h1>
+            <p class="page-subtitle">Compare up to 4 products side by side</p>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="no-compare">
+                <div class="no-compare-icon">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h3>No Products to Compare</h3>
+                <p>You haven't selected any products for comparison yet.</p>
+                <a href="@Url.Action("Index", "Product")" class="btn-primary">
+                    <i class="fas fa-shopping-bag"></i>
+                    Browse Products
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="compare-controls">
+                <div class="compare-info">
+                    <span class="compare-count">Comparing @Model.Count products</span>
+                </div>
+                <div class="compare-actions">
+                    <button class="btn-clear-all" onclick="clearAllCompare()">
+                        <i class="fas fa-trash"></i>
+                        Clear All
+                    </button>
+                    <a href="@Url.Action("Index", "Product")" class="btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Shop
+                    </a>
+                </div>
+            </div>
+
+            <div class="compare-table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr class="product-header">
+                            <th class="attribute-column">Product</th>
+                            @foreach (var product in Model)
+                            {
+                                <th class="product-column">
+                                    <div class="product-header-card">
+                                        <div class="product-image">
+                                            <img src="@product.Image" alt="@product.ProductName">
+                                            @if (product.Discount > 0)
+                                            {
+                                                <div class="discount-badge">-@product.Discount%</div>
+                                            }
+                                        </div>
+                                        <div class="product-info">
+                                            <h3 class="product-name">@product.ProductName</h3>
+                                            <div class="product-rating">
+                                                <div class="stars">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <span>(@product.Views)</span>
+                                            </div>
+                                        </div>
+                                        <button class="remove-btn" onclick="removeFromCompare(@product.ProductId)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Price Row -->
+                        <tr class="price-row">
+                            <td class="attribute-label">
+                                <i class="fas fa-tag"></i>
+                                Price
+                            </td>
+                            @foreach (var product in Model)
+                            {
+                                <td class="product-value">
+                                    <div class="price-info">
+                                        @if (product.Discount > 0)
+                                        {
+                                            <span class="current-price">@((product.UnitPrice * (1 - product.Discount / 100.0))?.ToString("C0"))</span>
+                                            <span class="original-price">@product.UnitPrice?.ToString("C0")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="current-price">@product.UnitPrice?.ToString("C0")</span>
+                                        }
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Brand Row -->
+                        <tr>
+                            <td class="attribute-label">
+                                <i class="fas fa-building"></i>
+                                Brand
+                            </td>
+                            @foreach (var product in Model)
+                            {
+                                <td class="product-value">
+                                    <span class="brand-name">@(product.Supplier?.CompanyName ?? "Premium Brand")</span>
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Category Row -->
+                        <tr>
+                            <td class="attribute-label">
+                                <i class="fas fa-tags"></i>
+                                Category
+                            </td>
+                            @foreach (var product in Model)
+                            {
+                                <td class="product-value">
+                                    <span class="category-name">@(product.Category?.CategoryName ?? "Electronics")</span>
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Discount Row -->
+                        <tr>
+                            <td class="attribute-label">
+                                <i class="fas fa-percentage"></i>
+                                Discount
+                            </td>
+                            @foreach (var product in Model)
+                            {
+                                <td class="product-value">
+                                    @if (product.Discount > 0)
+                                    {
+                                        <span class="discount-value">@product.Discount% OFF</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="no-discount">No Discount</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Description Row -->
+                        <tr>
+                            <td class="attribute-label">
+                                <i class="fas fa-info-circle"></i>
+                                Description
+                            </td>
+                            @foreach (var product in Model)
+                            {
+                                <td class="product-value">
+                                    <div class="description-text">@product.Description</div>
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Availability Row -->
+                        <tr>
+                            <td class="attribute-label">
+                                <i class="fas fa-check-circle"></i>
+                                Availability
+                            </td>
+                            @foreach (var product in Model)
+                            {
+                                <td class="product-value">
+                                    <span class="availability in-stock">
+                                        <i class="fas fa-check"></i>
+                                        In Stock
+                                    </span>
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Actions Row -->
+                        <tr class="actions-row">
+                            <td class="attribute-label">
+                                <i class="fas fa-shopping-cart"></i>
+                                Actions
+                            </td>
+                            @foreach (var product in Model)
+                            {
+                                <td class="product-value">
+                                    <div class="product-actions">
+                                        <form asp-action="AddToCart" asp-controller="Cart" asp-route-id="@product.ProductId" method="post" class="add-cart-form">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn-add-cart">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                Add to Cart
+                                            </button>
+                                        </form>
+
+                                        <a href="@Url.Action("Detail", "Product", new { id = product.ProductId })" class="btn-view-details">
+                                            <i class="fas fa-eye"></i>
+                                            View Details
+                                        </a>
+
+                                        <button class="btn-wishlist wishlist-btn" data-product-id="@product.ProductId">
+                                            <i class="fas fa-heart"></i>
+                                            Wishlist
+                                        </button>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function removeFromCompare(productId) {
+            let compare = JSON.parse(localStorage.getItem('compare') || '[]');
+            compare = compare.filter(id => id !== productId);
+            localStorage.setItem('compare', JSON.stringify(compare));
+            location.reload();
+        }
+
+        function clearAllCompare() {
+            if (confirm('Are you sure you want to clear all products from comparison?')) {
+                localStorage.removeItem('compare');
+                location.href = '@Url.Action("Index", "Product")';
+            }
+        }
+
+        // Wishlist functionality
+        function getWishlist() {
+            return JSON.parse(localStorage.getItem('wishlist') || '[]');
+        }
+
+        function setWishlist(arr) {
+            localStorage.setItem('wishlist', JSON.stringify(arr));
+        }
+
+        function updateWishlistButtons() {
+            var wishlist = getWishlist();
+            $('.wishlist-btn').each(function() {
+                var pid = parseInt($(this).data('product-id'));
+                if (wishlist.includes(pid)) {
+                    $(this).addClass('active');
+                } else {
+                    $(this).removeClass('active');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            updateWishlistButtons();
+
+            $('.wishlist-btn').click(function(e) {
+                e.preventDefault();
+                var pid = parseInt($(this).data('product-id'));
+                var wishlist = getWishlist();
+
+                if (wishlist.includes(pid)) {
+                    wishlist = wishlist.filter(x => x !== pid);
+                } else {
+                    wishlist.push(pid);
+                }
+
+                setWishlist(wishlist);
+                updateWishlistButtons();
+            });
+        });
+    </script>
 }
-<a href="@Url.Action("Index", "Product")" class="btn btn-secondary mt-3">Back to product list</a>

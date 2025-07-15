@@ -4,209 +4,388 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
-        <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item"><a href="/Product">Product</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@Model.ProductName</li>
-    </ol>
-</nav>
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-detail.css" />
+}
 
-<div class="row">
-    <div class="col-md-5 mb-4">
-        <div class="card shadow-sm p-3">
-            <img class="w-100 mb-2 rounded" src="@Model.Image" alt="@Model.ProductName" style="max-height:350px;object-fit:contain;">
-            @if (Model.Discount > 0)
-            {
-                <span class="badge badge-danger position-absolute" style="top:20px; right:30px; font-size:1.1rem; padding:0.6em 1.2em; border-radius:1em;">-@Model.Discount% OFF</span>
-            }
-        </div>
+<!-- Breadcrumb -->
+<div class="breadcrumb-section">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="/Product">Products</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.ProductName</li>
+            </ol>
+        </nav>
     </div>
-    <div class="col-md-7">
-        <div class="card shadow-sm p-4">
-            <h2 class="mb-3 font-weight-bold">@Model.ProductName</h2>
-            <div class="mb-3">
-                <span class="h4 text-danger font-weight-bold">@((Model.UnitPrice * (1 - Model.Discount / 100.0))?.ToString("C0"))</span>
-                @if (Model.Discount > 0)
-                {
-                    <span class="h6 text-muted ml-2"><del>@Model.UnitPrice?.ToString("C0")</del></span>
-                }
-            </div>
-            <div class="mb-3">
-                <span class="badge badge-info">@Model.Supplier?.CompanyName</span>
-                <span class="ml-3"><i class="fa fa-eye"></i> @Model.Views views</span>
-            </div>
-            <div class="mb-4">
+</div>
 
-                <form asp-action="AddToCart"
-                      asp-controller="Cart"
-                      asp-route-id="@Model.ProductId"
-                      method="post"
-                      class="d-flex flex-column align-items-start mb-4 pt-2">
+<!-- Product Detail Section -->
+<div class="product-detail-section">
+    <div class="container">
+        <div class="row">
+            <!-- Product Images -->
+            <div class="col-lg-6">
+                <div class="product-images">
+                    <div class="main-image">
+                        <img src="@Model.Image" alt="@Model.ProductName" id="mainImage">
+                        @if (Model.Discount > 0)
+                        {
+                            <div class="discount-badge">
+                                <span>-@Model.Discount% OFF</span>
+                            </div>
+                        }
+                    </div>
 
-                    <!-- Quantity selector -->
-                    <div class="input-group quantity mb-3" style="width:120px;">
-                        <div class="input-group-btn">
-                            <button type="button"
-                                    class="btn btn-sm btn-minus rounded-circle bg-light border">
-                                <i class="fa fa-minus"></i>
-                            </button>
+                    <!-- Thumbnail images (placeholder for now) -->
+                    <div class="thumbnail-images">
+                        <div class="thumbnail active">
+                            <img src="@Model.Image" alt="@Model.ProductName">
+                        </div>
+                        <div class="thumbnail">
+                            <img src="@Model.Image" alt="@Model.ProductName">
+                        </div>
+                        <div class="thumbnail">
+                            <img src="@Model.Image" alt="@Model.ProductName">
+                        </div>
+                        <div class="thumbnail">
+                            <img src="@Model.Image" alt="@Model.ProductName">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <div class="product-info">
+                    <div class="product-category">
+                        @(Model.Category?.CategoryName ?? "Electronics")
+                    </div>
+
+                    <h1 class="product-title">@Model.ProductName</h1>
+
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="rating-text">(4.8 out of 5)</span>
+                        <span class="review-count">@Model.Views reviews</span>
+                    </div>
+
+                    <div class="product-price">
+                        @if (Model.Discount > 0)
+                        {
+                            <span class="current-price">@((Model.UnitPrice * (1 - Model.Discount / 100.0))?.ToString("C0"))</span>
+                            <span class="original-price">@Model.UnitPrice?.ToString("C0")</span>
+                            <span class="savings">You save @((Model.UnitPrice * Model.Discount / 100.0)?.ToString("C0"))</span>
+                        }
+                        else
+                        {
+                            <span class="current-price">@Model.UnitPrice?.ToString("C0")</span>
+                        }
+                    </div>
+
+                    <div class="product-brand">
+                        <i class="fas fa-building"></i>
+                        <span>Brand: <strong>@(Model.Supplier?.CompanyName ?? "Premium Brand")</strong></span>
+                    </div>
+
+                    <div class="product-availability">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span class="text-success">In Stock</span>
+                    </div>
+
+                    <!-- Add to Cart Form -->
+                    <form asp-action="AddToCart" asp-controller="Cart" asp-route-id="@Model.ProductId" method="post" class="add-to-cart-section">
+                        <div class="quantity-selector">
+                            <label>Quantity:</label>
+                            <div class="quantity-controls">
+                                <button type="button" class="qty-btn minus">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" name="quantity" value="1" min="1" max="10" class="qty-input">
+                                <button type="button" class="qty-btn plus">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
 
-                        <input name="quantity"
-                               type="text"
-                               value="1"
-                               class="form-control form-control-sm text-center border-0"
-                               readonly>
-
-                        <div class="input-group-btn">
-                            <button type="button"
-                                    class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                <i class="fa fa-plus"></i>
+                        <div class="action-buttons">
+                            <button type="submit" class="btn-add-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
                             </button>
+
+                            <button type="button" class="btn-wishlist wishlist-btn-detail" data-product-id="@Model.ProductId">
+                                <i class="fas fa-heart"></i>
+                                Add to Wishlist
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Product Features -->
+                    <div class="product-features">
+                        <div class="feature">
+                            <i class="fas fa-truck"></i>
+                            <div>
+                                <strong>Free Shipping</strong>
+                                <span>On orders over $50</span>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-undo"></i>
+                            <div>
+                                <strong>30-Day Returns</strong>
+                                <span>Easy return policy</span>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <strong>2 Year Warranty</strong>
+                                <span>Manufacturer warranty</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Add‑to‑Cart button -->
-                    <button type="submit" class="btn btn-primary btn-lg font-weight-bold px-4"><i class="fa fa-shopping-cart mr-2"></i>Add to Cart</button>
-                </form>
-
-                <button class="btn btn-outline-danger btn-lg font-weight-bold px-4 ml-2 wishlist-btn-detail" data-product-id="@Model.ProductId" data-toggle="tooltip" title="Favorite"><span class="wishlist-icon-detail">❤️</span></button>
-            </div>
-            <div class="mb-4">
-                <h5 class="font-weight-bold mb-2">Product Description</h5>
-                <div class="bg-light rounded p-3 border">
-                    @Model.Description
+                    <!-- Social Share -->
+                    <div class="social-share">
+                        <span>Share:</span>
+                        <a href="#" class="social-btn facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-btn twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-btn pinterest"><i class="fab fa-pinterest"></i></a>
+                        <a href="#" class="social-btn whatsapp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
                 </div>
             </div>
-            <div class="mb-2">
-                <strong>Share:</strong>
-                <a class="btn btn-light btn-sm ml-2" href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a class="btn btn-light btn-sm ml-1" href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                <a class="btn btn-light btn-sm ml-1" href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                <a class="btn btn-light btn-sm ml-1" href="#" title="Pinterest"><i class="fab fa-pinterest"></i></a>
+        </div>
+
+        <!-- Product Description Tabs -->
+        <div class="product-tabs">
+            <ul class="tab-nav">
+                <li class="tab-item active">
+                    <a href="#description" class="tab-link">Description</a>
+                </li>
+                <li class="tab-item">
+                    <a href="#specifications" class="tab-link">Specifications</a>
+                </li>
+                <li class="tab-item">
+                    <a href="#reviews" class="tab-link">Reviews (@Model.Views)</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="description" class="tab-pane active">
+                    <div class="description-content">
+                        <h3>Product Description</h3>
+                        <p>@Model.Description</p>
+
+                        <div class="description-features">
+                            <h4>Key Features:</h4>
+                            <ul>
+                                <li>High-quality materials and construction</li>
+                                <li>Advanced technology for superior performance</li>
+                                <li>Ergonomic design for comfort and usability</li>
+                                <li>Energy efficient and environmentally friendly</li>
+                                <li>Compatible with multiple devices and systems</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="specifications" class="tab-pane">
+                    <div class="specifications-content">
+                        <h3>Technical Specifications</h3>
+                        <table class="spec-table">
+                            <tr>
+                                <td>Brand</td>
+                                <td>@(Model.Supplier?.CompanyName ?? "Premium Brand")</td>
+                            </tr>
+                            <tr>
+                                <td>Category</td>
+                                <td>@(Model.Category?.CategoryName ?? "Electronics")</td>
+                            </tr>
+                            <tr>
+                                <td>Model</td>
+                                <td>@Model.ProductName</td>
+                            </tr>
+                            <tr>
+                                <td>Warranty</td>
+                                <td>2 Years Manufacturer Warranty</td>
+                            </tr>
+                            <tr>
+                                <td>Dimensions</td>
+                                <td>Standard Size</td>
+                            </tr>
+                            <tr>
+                                <td>Weight</td>
+                                <td>Lightweight Design</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="reviews" class="tab-pane">
+                    <div class="reviews-content">
+                        <h3>Customer Reviews</h3>
+                        <div class="reviews-summary">
+                            <div class="rating-overview">
+                                <div class="average-rating">
+                                    <span class="rating-number">4.8</span>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="total-reviews">Based on @Model.Views reviews</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="review-item">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">JD</div>
+                                <div class="reviewer-details">
+                                    <h4>John Doe</h4>
+                                    <div class="review-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="review-date">2 days ago</span>
+                                </div>
+                            </div>
+                            <div class="review-content">
+                                <p>Excellent product! Great quality and fast delivery. Highly recommended!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Related Products -->
 @if (ViewBag.Related != null && ((IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related).Any())
 {
-    <div class="container-fluid pb-5 mt-5">
-        <h4 class="mb-4">Related Products</h4>
-        <div class="row px-xl-5">
-            @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related)
-            {
-                <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                    <div class="product-item bg-light mb-4 rounded shadow-sm">
-                        <div class="product-img position-relative overflow-hidden">
-                            <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
-                            <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-eye"></i></a>
-                            </div>
+    <div class="related-products-section">
+        <div class="container">
+            <h2 class="section-title">Related Products</h2>
+            <div class="products-slider">
+                @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related)
+                {
+                    <div class="product-card-small">
+                        <div class="product-image">
+                            <img src="@product.Image" alt="@product.ProductName">
+                            @if (product.Discount > 0)
+                            {
+                                <div class="discount-badge">-@product.Discount%</div>
+                            }
                         </div>
-                        <div class="text-center py-4">
-                            <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
-                            <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-}
-
-@if (ViewBag.SameSupplier != null && ((IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier).Any())
-{
-    <div class="container-fluid pb-5 mt-4">
-        <h4 class="mb-4">Products from Same Supplier</h4>
-        <div class="row px-xl-5">
-            @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier)
-            {
-                <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
-                    <div class="product-item bg-light mb-4 rounded shadow-sm">
-                        <div class="product-img position-relative overflow-hidden">
-                            <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
-                            <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="@Url.Action("Detail", "Product", new { id = product.ProductId })"><i class="fa fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="text-center py-4">
-                            <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
-                            <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
+                        <div class="product-info">
+                            <h4><a href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a></h4>
+                            <div class="price">
+                                @if (product.Discount > 0)
+                                {
+                                    <span class="current">@((product.UnitPrice * (1 - product.Discount / 100.0))?.ToString("C0"))</span>
+                                    <span class="original">@product.UnitPrice?.ToString("C0")</span>
+                                }
+                                else
+                                {
+                                    <span class="current">@product.UnitPrice?.ToString("C0")</span>
+                                }
                             </div>
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 }
 
 @section Scripts {
+    <script src="~/js/product-detail.js"></script>
     <script>
-        // Wishlist for detail page
+        // Quantity controls
+        $(document).on('click', '.qty-btn', function() {
+            const isPlus = $(this).hasClass('plus');
+            const input = $(this).siblings('.qty-input');
+            let value = parseInt(input.val()) || 1;
+
+            if (isPlus) {
+                value = Math.min(value + 1, 10);
+            } else {
+                value = Math.max(value - 1, 1);
+            }
+
+            input.val(value);
+        });
+
+        // Tab functionality
+        $('.tab-link').click(function(e) {
+            e.preventDefault();
+            const target = $(this).attr('href');
+
+            $('.tab-item').removeClass('active');
+            $('.tab-pane').removeClass('active');
+
+            $(this).parent().addClass('active');
+            $(target).addClass('active');
+        });
+
+        // Thumbnail images
+        $('.thumbnail img').click(function() {
+            $('.thumbnail').removeClass('active');
+            $(this).parent().addClass('active');
+            $('#mainImage').attr('src', $(this).attr('src'));
+        });
+
+        // Wishlist functionality
         function getWishlist() {
             return JSON.parse(localStorage.getItem('wishlist') || '[]');
         }
+
         function setWishlist(arr) {
             localStorage.setItem('wishlist', JSON.stringify(arr));
         }
+
         function updateWishlistDetail() {
             var wishlist = getWishlist();
             var pid = parseInt($('.wishlist-btn-detail').data('product-id'));
+
             if (wishlist.includes(pid)) {
-                $('.wishlist-btn-detail').addClass('active-wishlist').attr('title', 'Remove from favorites');
-                $('.wishlist-icon-detail').css({color:'#dc3545'});
+                $('.wishlist-btn-detail').addClass('active').find('i').removeClass('far').addClass('fas');
             } else {
-                $('.wishlist-btn-detail').removeClass('active-wishlist').attr('title', 'Favorite');
-                $('.wishlist-icon-detail').css({color:''});
+                $('.wishlist-btn-detail').removeClass('active').find('i').removeClass('fas').addClass('far');
             }
-            $('.wishlist-btn-detail').tooltip('dispose').tooltip();
         }
-        $(function () {
+
+        $(document).ready(function() {
             updateWishlistDetail();
-            $(document).on('click', '.wishlist-btn-detail', function (e) {
+
+            $('.wishlist-btn-detail').click(function(e) {
                 e.preventDefault();
                 var pid = parseInt($(this).data('product-id'));
                 var wishlist = getWishlist();
+
                 if (wishlist.includes(pid)) {
                     wishlist = wishlist.filter(x => x !== pid);
                 } else {
                     wishlist.push(pid);
                 }
+
                 setWishlist(wishlist);
                 updateWishlistDetail();
-            });
-        });
-    </script>
-    <style>
-        .active-wishlist .wishlist-icon-detail {
-            color: #dc3545 !important;
-            text-shadow: 0 2px 8px rgba(220,53,69,0.15);
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const qtyWrap = document.querySelector('.quantity');
-            if (!qtyWrap) return;
-
-            qtyWrap.addEventListener('click', e => {
-                const minus = e.target.closest('.btn-minus');
-                const plus  = e.target.closest('.btn-plus');
-                if (!minus && !plus) return;
-
-                const input = qtyWrap.querySelector('input[name="quantity"]');
-                let val = parseInt(input.value || '1', 10);
-
-                if (plus)  val++;
-                if (minus && val > 1) val--;
-
-                input.value = val;
             });
         });
     </script>
