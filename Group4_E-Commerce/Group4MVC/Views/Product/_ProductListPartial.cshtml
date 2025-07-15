@@ -1,155 +1,543 @@
 @model IEnumerable<DAL_Group4_E_Commerce.Models.Product>
-<div class="row pb-3">
-    @foreach (var product in Model)
-    {
-        <div class="col-lg-4 col-md-6 col-sm-6 pb-1">
-            <div class="product-item bg-light mb-4">
-                <div class="product-img position-relative overflow-hidden">
-                    <img class="img-fluid w-100" src="@product.Image" alt="@product.ProductName">
-                    @if (product.Discount > 0)
-                    {
-                        <span class="badge badge-danger position-absolute discount-badge" title="Discount">-@product.Discount% <i class='fa fa-bolt'></i></span>
-                    }
-                    <div class="product-action">
-                        <a class="btn btn-outline-dark btn-square action-btn add-to-cart-btn" asp-action="AddToCart"
-                           asp-controller="Cart"
-                           asp-route-id="@product.ProductId" data-toggle="tooltip" title="Add to cart" aria-label="Add to cart">🛒</a>
-                        <a class="btn btn-outline-dark btn-square action-btn wishlist-btn" href="#" data-toggle="tooltip" title="Favourite" aria-label="Favourite" data-product-id="@product.ProductId">❤️</a>
-                        <a class="btn btn-outline-dark btn-square action-btn compare-btn" href="#" data-toggle="tooltip" title="Compare" aria-label="Compare" data-product-id="@product.ProductId">🔄</a>
-                        <a class="btn btn-outline-dark btn-square action-btn" href="@Url.Action("Detail", "Product", new { id = product.ProductId })" data-toggle="tooltip" title="Details" aria-label="Details">👁️</a>
-                    </div>
-                </div>
-                <div class="text-center py-4">
-                    <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
-                    <div class="d-flex align-items-center justify-content-center mt-2">
-                        <h5 class="mb-0 text-danger font-weight-bold">@((product.UnitPrice * (1 - product.Discount/100.0))?.ToString("C0"))</h5>
-                        @if (product.Discount > 0)
-                        {
-                            <h6 class="text-muted ml-2 mb-0"><del>@(product.UnitPrice?.ToString("C0"))</del></h6>
-                        }
-                    </div>
-                    <div class="d-flex align-items-center justify-content-center mb-1">
-                        <small class="fa fa-star text-primary mr-1"></small>
-                        <small class="fa fa-star text-primary mr-1"></small>
-                        <small class="fa fa-star text-primary mr-1"></small>
-                        <small class="fa fa-star text-primary mr-1"></small>
-                        <small class="fa fa-star text-primary mr-1"></small>
-                        <small>(@product.Views)</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-</div>
+
 <style>
-    .action-btn {
-        transition: transform 0.15s, box-shadow 0.15s;
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
     }
-    .action-btn:hover {
-        transform: scale(1.15);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        background: #f8f9fa;
+
+    .product-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+    .product-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+        position: relative;
+    }
+
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+
     .discount-badge {
-        top: 10px;
-        right: 10px;
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         z-index: 2;
-        font-size: 1rem;
-        padding: 0.5em 1em;
-        border-radius: 1em;
-        background: #dc3545;
-        color: #fff;
-        font-weight: bold;
-        letter-spacing: 1px;
-        box-shadow: 0 2px 8px rgba(220,53,69,0.15);
+        animation: bounce 2s infinite;
+    }
+
+    keyframes bounce {
+        0%, 20%, 50%, 80%, 100%
+
+    {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-5px);
+    }
+
+    60% {
+        transform: translateY(-3px);
+    }
+
+    }
+
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
-        gap: 0.3em;
+        justify-content: center;
+        opacity: 0;
+        background: rgba(0, 0, 0, 0.5);
+        transition: opacity 0.3s ease;
     }
-    .text-danger.font-weight-bold {
-        color: #dc3545 !important;
-        font-weight: bold !important;
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
     }
-    .active-wishlist {
-        color: #dc3545 !important;
-        background: #ffe6ea !important;
-        border-color: #dc3545 !important;
+
+    .product-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.3s ease;
     }
-    .active-compare {
-        color: #007bff !important;
-        background: #e6f0ff !important;
-        border-color: #007bff !important;
+
+    .product-card:hover .product-actions {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .action-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        color: #64748b;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            color: white;
+        }
+
+        .action-btn.wishlist-btn:hover {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .action-btn.compare-btn:hover {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+    .product-info {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-category {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .product-title:hover {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+    .product-price {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .current-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ef4444;
+    }
+
+    .original-price {
+        font-size: 1rem;
+        color: #94a3b8;
+        text-decoration: line-through;
+    }
+
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .stars {
+        display: flex;
+        gap: 0.125rem;
+    }
+
+    .star {
+        color: #fbbf24;
+        font-size: 0.875rem;
+    }
+
+    .product-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .product-footer {
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .add-to-cart-form {
+        display: flex;
+        justify-content: center;
+    }
+
+    .add-to-cart-btn {
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+        .add-to-cart-btn:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+    .no-products {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #64748b;
+    }
+
+    .no-products-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .no-products-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+
+    .no-products-text {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+    media (max-width: 768px) {
+        .products-grid
+
+    {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .product-image {
+        height: 200px;
+    }
+
+    .product-info {
+        padding: 1rem;
+    }
+
     }
 </style>
-@section Scripts {
-<script>
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
 
-        // Helper: get/set array from localStorage
+@if (!Model.Any())
+{
+    <div class="no-products">
+        <div class="no-products-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h3 class="no-products-title">No Products Found</h3>
+        <p class="no-products-text">Try adjusting your search or filter criteria</p>
+        <a href="@Url.Action("Index", "Product")" class="btn-primary">
+            <i class="fas fa-arrow-left"></i>
+            Back to All Products
+        </a>
+    </div>
+}
+else
+{
+    <div class="products-grid">
+        @foreach (var product in Model)
+        {
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="@product.Image" alt="@product.ProductName" loading="lazy">
+
+                    @if (product.Discount > 0)
+                    {
+                        <div class="discount-badge">
+                            <span>-@product.Discount%</span>
+                        </div>
+                    }
+
+                    <div class="product-overlay">
+                        <div class="product-actions">
+                            <button class="action-btn wishlist-btn"
+                                    data-product-id="@product.ProductId"
+                                    title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+
+                            <button class="action-btn compare-btn"
+                                    data-product-id="@product.ProductId"
+                                    title="Add to Compare">
+                                <i class="fas fa-balance-scale"></i>
+                            </button>
+
+                            <a href="@Url.Action("Detail", "Product", new { id = product.ProductId })"
+                               class="action-btn view-btn"
+                               title="Quick View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-info">
+                    <div class="product-category">
+                        @(product.Category?.CategoryName ?? "Electronics")
+                    </div>
+
+                    <h3 class="product-title">
+                        <a href="@Url.Action("Detail", "Product", new { id = product.ProductId })">
+                            @product.ProductName
+                        </a>
+                    </h3>
+
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="rating-count">(@product.Views)</span>
+                    </div>
+
+                    <div class="product-price">
+                        @if (product.Discount > 0)
+                        {
+                            <span class="current-price">@((product.UnitPrice * (1 - product.Discount / 100.0))?.ToString("C0"))</span>
+                            <span class="original-price">@(product.UnitPrice?.ToString("C0"))</span>
+                        }
+                        else
+                        {
+                            <span class="current-price">@(product.UnitPrice?.ToString("C0"))</span>
+                        }
+                    </div>
+
+                    <div class="product-brand">
+                        <i class="fas fa-building"></i>
+                        @(product.Supplier?.CompanyName ?? "Brand")
+                    </div>
+                </div>
+
+                <div class="product-footer">
+                    <form asp-action="AddToCart" asp-controller="Cart" asp-route-id="@product.ProductId" method="post" class="add-to-cart-form">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="add-to-cart-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            Add to Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Initialize tooltips
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            updateIcons();
+        });
+
+        // Helper functions for localStorage
         function getList(key) {
             return JSON.parse(localStorage.getItem(key) || '[]');
         }
+
         function setList(key, arr) {
             localStorage.setItem(key, JSON.stringify(arr));
         }
 
-        // Cập nhật trạng thái icon khi load trang
+        // Update wishlist and compare icons
         function updateIcons() {
             var wishlist = getList('wishlist');
             var compare = getList('compare');
+
             $('.wishlist-btn').each(function () {
-                var pid = $(this).data('product-id');
+                var pid = parseInt($(this).data('product-id'));
                 if (wishlist.includes(pid)) {
-                        $(this).addClass('active-wishlist').attr('title', 'Remove from favorites').tooltip('dispose').tooltip();
+                    $(this).addClass('active-wishlist').attr('title', 'Remove from Wishlist');
                 } else {
-                        $(this).removeClass('active-wishlist').attr('title', 'Favourite').tooltip('dispose').tooltip();
+                    $(this).removeClass('active-wishlist').attr('title', 'Add to Wishlist');
                 }
             });
+
             $('.compare-btn').each(function () {
-                var pid = $(this).data('product-id');
+                var pid = parseInt($(this).data('product-id'));
                 if (compare.includes(pid)) {
-                        $(this).addClass('active-compare').attr('title', 'Quit comparing').tooltip('dispose').tooltip();
+                    $(this).addClass('active-compare').attr('title', 'Remove from Compare');
                 } else {
-                    $(this).removeClass('active-compare').attr('title', 'Compare').tooltip('dispose').tooltip();
+                    $(this).removeClass('active-compare').attr('title', 'Compare Product');
                 }
             });
+
+            updateCompareButton();
+
+            // Refresh tooltips
+            $('[data-toggle="tooltip"]').tooltip('dispose').tooltip();
         }
 
-        // Xử lý click wishlist
+        // Handle wishlist clicks
         $(document).on('click', '.wishlist-btn', function (e) {
             e.preventDefault();
-            var pid = $(this).data('product-id');
+            var pid = parseInt($(this).data('product-id'));
             var wishlist = getList('wishlist');
+
             if (wishlist.includes(pid)) {
                 wishlist = wishlist.filter(x => x !== pid);
+                showNotification('Removed from wishlist', 'info');
             } else {
                 wishlist.push(pid);
+                showNotification('Added to wishlist', 'success');
             }
+
             setList('wishlist', wishlist);
             updateIcons();
         });
 
-        // Xử lý click compare
+        // Handle compare clicks
         $(document).on('click', '.compare-btn', function (e) {
             e.preventDefault();
-            var pid = $(this).data('product-id');
+            var pid = parseInt($(this).data('product-id'));
             var compare = getList('compare');
+
             if (compare.includes(pid)) {
                 compare = compare.filter(x => x !== pid);
+                showNotification('Removed from compare', 'info');
             } else {
                 if (compare.length >= 4) {
-                        alert('You can only compare up to 4 products!');
+                    showNotification('You can only compare up to 4 products!', 'warning');
                     return;
                 }
                 compare.push(pid);
+                showNotification('Added to compare', 'success');
             }
+
             setList('compare', compare);
             updateIcons();
         });
 
-        // Khi load trang, cập nhật icon
-        updateIcons();
-    });
-</script>
-} 
+        // Update compare floating button
+        function updateCompareButton() {
+            var compare = getList('compare');
+            if (compare.length > 0) {
+                $('#compare-float-btn').show();
+                $('#compare-count').text(compare.length);
+            } else {
+                $('#compare-float-btn').hide();
+            }
+        }
+
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = $(`
+                <div class="alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show"
+                     style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `);
+
+            $('body').append(notification);
+
+            setTimeout(() => {
+                notification.alert('close');
+            }, 3000);
+        }
+
+        // Export function for parent page
+        window.afterAjaxProductList = function() {
+            $('[data-toggle="tooltip"]').tooltip();
+            updateIcons();
+        };
+    </script>
+}
