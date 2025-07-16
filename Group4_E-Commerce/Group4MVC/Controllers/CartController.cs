@@ -78,6 +78,7 @@ namespace GUI_Group4_ECommerce.Controllers
             return RedirectToAction(nameof(Index));
         }
         [Authorize]
+
         [HttpGet]
         public IActionResult Checkout()
         {
@@ -90,7 +91,9 @@ namespace GUI_Group4_ECommerce.Controllers
             }
         }
 
+
         [Authorize]
+
         [HttpPost]
         public IActionResult Checkout(CheckoutVM model, string payment = "COD")
         {
@@ -106,6 +109,7 @@ namespace GUI_Group4_ECommerce.Controllers
                 };
                 return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, vnPayModel));
             }
+
             // login check disabled for testing
             var idClaim = HttpContext.User.FindFirst(MySetting.CLAIM_CUSTOMERID);
             if (idClaim == null) return Unauthorized();
@@ -171,14 +175,17 @@ namespace GUI_Group4_ECommerce.Controllers
                 return View(CartItems);
             }
         }
+
         [Authorize]
+
+
         public IActionResult PaymentFail()
         {
             return View();
         }
 
 
-        //[Authorize]
+        [Authorize]
         public IActionResult PaymentCallBack()
         {
             var response = _vnPayService.PaymentExecute(Request.Query);
@@ -187,10 +194,10 @@ namespace GUI_Group4_ECommerce.Controllers
                 return RedirectToAction("PaymentFail");
             }
             TempData["Message"] = $"VnPay payment success {response.VnPayResponseCode} ";
-            return RedirectToAction("PaymentSuccess");
+            return RedirectToAction("Success");
         }
 
-        public IActionResult PaymentSuccess() => View("Success");
+        public IActionResult Success() => View("Success");
     }
 
 

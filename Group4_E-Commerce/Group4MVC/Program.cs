@@ -27,6 +27,7 @@ namespace Group4MVC
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
             // Add Authentication Services
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -58,6 +59,7 @@ namespace Group4MVC
                 options.AddPolicy("CustomerOnly", policy => policy.RequireClaim("UserType", "Customer"));
                 options.AddPolicy("EmployeeOnly", policy => policy.RequireClaim("UserType", "Employee"));
             });
+
             builder.Services.AddSingleton<IVnPayService,VnPayService>();
 
             var app = builder.Build();
