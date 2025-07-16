@@ -29,6 +29,7 @@ namespace Group4MVC
             });
             builder.Services.AddSingleton<IVnPayService,VnPayService>();
 
+
             // Add Authentication Services
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -62,6 +63,7 @@ namespace Group4MVC
             });
 
             builder.Services.AddSingleton<IVnPayService,VnPayService>();
+
 
             var app = builder.Build();
 

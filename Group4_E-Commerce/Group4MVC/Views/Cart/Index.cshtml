@@ -4,11 +4,13 @@
 @{
     ViewData["Title"] = "Shopping Cart";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/cart.css" />
 }
+
 
 <!-- Breadcrumb -->
 <div class="breadcrumb-section">
@@ -21,6 +23,91 @@
             </ol>
         </nav>
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Your cart is empty.
+        </div>
+        <a asp-action="Index" asp-controller="Product" class="btn btn-primary">
+            ← Continue shopping
+        </a>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th colspan="2">Product</th>
+                        <th class="text-end">Unit&nbsp;Price</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-end">Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var index = 1;
+                        decimal grandTotal = 0;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        var subTotal = item.UnitPrice * item.Quantity;
+                        grandTotal += (decimal)subTotal;
+                        <tr>
+                            <td>@index</td>
+                            <td style="width:80px;">
+                                <img src="@item.Image" alt="@item.ProductName" class="img-thumbnail" style="max-width:60px;" />
+                            </td>
+                            <td>@item.ProductName</td>
+
+                            <td class="text-end">@item.UnitPrice.ToString("#,##0", vi) VNĐ</td>
+
+                            <td class="text-center">
+                                <a asp-action="UpdateQuantity" asp-route-id="@item.ProductId" asp-route-delta="-1"
+                                   class="btn btn-sm btn-outline-secondary me-1">−</a>
+                                @item.Quantity
+                                <a asp-action="UpdateQuantity" asp-route-id="@item.ProductId" asp-route-delta="1"
+                                   class="btn btn-sm btn-outline-secondary ms-1">+</a>
+                            </td>
+
+                            <td class="text-end">@subTotal.ToString("#,##0", vi) VNĐ</td>
+
+                            <td class="text-end">
+                                <a asp-action="Remove"
+                                   asp-controller="Cart"
+                                   asp-route-id="@item.ProductId"
+                                   class="btn btn-sm btn-outline-danger">
+                                    ×
+                                </a>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <th colspan="5" class="text-end">Total:</th>
+                        <th class="text-end">@grandTotal.ToString("#,##0", vi) VNĐ</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <a asp-action="Index" asp-controller="Product" class="btn btn-outline-secondary">
+                ← Continue shopping
+            </a>
+
+            <a asp-action="Checkout" asp-controller="Cart" class="btn btn-primary">
+                Checkout →
+            </a>
+        </div>
+    }
+
 </div>
 
 <!-- Cart Section -->
