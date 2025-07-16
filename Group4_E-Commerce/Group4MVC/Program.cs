@@ -65,6 +65,7 @@ namespace Group4MVC
             builder.Services.AddSingleton<IVnPayService,VnPayService>();
 
 
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
