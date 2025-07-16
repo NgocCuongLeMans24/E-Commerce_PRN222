@@ -27,6 +27,7 @@ namespace Group4MVC
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+            builder.Services.AddSingleton<IVnPayService,VnPayService>();
 
             // Add Authentication Services
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
