@@ -1,7 +1,8 @@
-@model List<DAL_Group4_E_Commerce.Models.Product>
+﻿@model List<DAL_Group4_E_Commerce.Models.Product>
 @{
     ViewData["Title"] = "Product Comparison";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
 }
 <h2 class="my-4">Product Comparison</h2>
 @if (Model == null || !Model.Any())
@@ -33,14 +34,14 @@ else
                     <td>Original Price</td>
                     @foreach (var p in Model)
                     {
-                        <td>@p.UnitPrice?.ToString("C0")</td>
+                        <td>@(p.UnitPrice?.ToString("#,##0", vi)) VNĐ</td>
                     }
                 </tr>
                 <tr>
                     <td>Discounted Price</td>
                     @foreach (var p in Model)
                     {
-                        <td class="text-danger font-weight-bold">@((p.UnitPrice * (1 - p.Discount / 100.0))?.ToString("C0"))</td>
+                        <td class="text-danger font-weight-bold">@((p.UnitPrice * (1 - p.Discount / 100.0))?.ToString("#,##0", vi)) VNĐ</td>
                     }
                 </tr>
                 <tr>

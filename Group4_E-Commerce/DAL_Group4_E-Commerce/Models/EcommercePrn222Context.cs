@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace DAL_Group4_E_Commerce.Models;
 
@@ -54,13 +54,13 @@ public partial class EcommercePrn222Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-		var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-		if (!optionsBuilder.IsConfigured)
-		{
-			optionsBuilder.UseSqlServer(config.GetConnectionString("DB"));
+        var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(config.GetConnectionString("DB"));
 
-		}
-	}
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -212,6 +212,7 @@ public partial class EcommercePrn222Context : DbContext
             entity.Property(e => e.PaymentMethod)
                 .HasMaxLength(50)
                 .HasDefaultValue("Cash");
+            entity.Property(e => e.Phone).HasMaxLength(24);
             entity.Property(e => e.RequiredDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -280,7 +281,7 @@ public partial class EcommercePrn222Context : DbContext
             entity.Property(e => e.Alias).HasMaxLength(50);
             entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
             entity.Property(e => e.Discount).HasDefaultValue(0.0);
-            entity.Property(e => e.Image).HasMaxLength(50);
+            entity.Property(e => e.Image).HasMaxLength(255);
             entity.Property(e => e.ManufactureDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");

@@ -1,9 +1,10 @@
-﻿@using GUI_Group4_ECommerce.ViewModels   <!-- adjust namespace if CartItem lives elsewhere -->
+﻿@using GUI_Group4_ECommerce.ViewModels
 @model IEnumerable<CartItem>
 
 @{
     ViewData["Title"] = "My Cart";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
 }
 
 <div class="container-fluid py-4">
@@ -48,7 +49,7 @@
                             </td>
                             <td>@item.ProductName</td>
 
-                            <td class="text-end">@item.UnitPrice.ToString("C0")</td>
+                            <td class="text-end">@item.UnitPrice.ToString("#,##0", vi) VNĐ</td>
 
                             <td class="text-center">
                                 <a asp-action="UpdateQuantity" asp-route-id="@item.ProductId" asp-route-delta="-1"
@@ -58,7 +59,7 @@
                                    class="btn btn-sm btn-outline-secondary ms-1">+</a>
                             </td>
 
-                            <td class="text-end">@subTotal.ToString("C0")</td>
+                            <td class="text-end">@subTotal.ToString("#,##0", vi) VNĐ</td>
 
                             <td class="text-end">
                                 <a asp-action="Remove"
@@ -75,7 +76,7 @@
                 <tfoot class="table-light">
                     <tr>
                         <th colspan="5" class="text-end">Total:</th>
-                        <th class="text-end">@grandTotal.ToString("C0")</th>
+                        <th class="text-end">@grandTotal.ToString("#,##0", vi) VNĐ</th>
                         <th></th>
                     </tr>
                 </tfoot>
@@ -87,7 +88,7 @@
                 ← Continue shopping
             </a>
 
-            <a asp-action="Checkout" asp-controller="Order" class="btn btn-primary">
+            <a asp-action="Checkout" asp-controller="Cart" class="btn btn-primary">
                 Checkout →
             </a>
         </div>

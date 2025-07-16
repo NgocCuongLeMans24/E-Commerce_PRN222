@@ -3,6 +3,11 @@
     ViewData["Title"] = "Product Detail";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@using System.Globalization
+@{
+    // Culture for Vietnamese number formatting
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+}
 
 <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
@@ -26,10 +31,19 @@
         <div class="card shadow-sm p-4">
             <h2 class="mb-3 font-weight-bold">@Model.ProductName</h2>
             <div class="mb-3">
-                <span class="h4 text-danger font-weight-bold">@((Model.UnitPrice * (1 - Model.Discount / 100.0))?.ToString("C0"))</span>
-                @if (Model.Discount > 0)
+                @{
+                    decimal basePrice = (decimal)(Model.UnitPrice ?? 0);
+                    decimal discount = (decimal)(Model.Discount ?? 0);
+                    decimal finalPrice = Math.Round(basePrice * (1 - discount / 100), 0);
+                }
+                <span class="h4 text-danger font-weight-bold">
+                    @(finalPrice.ToString("#,##0", vi)) VNĐ
+                </span>
+                @if (discount > 0)
                 {
-                    <span class="h6 text-muted ml-2"><del>@Model.UnitPrice?.ToString("C0")</del></span>
+                    <span class="h6 text-muted ml-2">
+                        <del>@(basePrice.ToString("#,##0", vi)) VNĐ</del>
+                    </span>
                 }
             </div>
             <div class="mb-3">
@@ -37,40 +51,26 @@
                 <span class="ml-3"><i class="fa fa-eye"></i> @Model.Views views</span>
             </div>
             <div class="mb-4">
-
                 <form asp-action="AddToCart"
                       asp-controller="Cart"
                       asp-route-id="@Model.ProductId"
                       method="post"
                       class="d-flex flex-column align-items-start mb-4 pt-2">
-
-                    <!-- Quantity selector -->
                     <div class="input-group quantity mb-3" style="width:120px;">
                         <div class="input-group-btn">
-                            <button type="button"
-                                    class="btn btn-sm btn-minus rounded-circle bg-light border">
+                            <button type="button" class="btn btn-sm btn-minus rounded-circle bg-light border">
                                 <i class="fa fa-minus"></i>
                             </button>
                         </div>
-
-                        <input name="quantity"
-                               type="text"
-                               value="1"
-                               class="form-control form-control-sm text-center border-0"
-                               readonly>
-
+                        <input name="quantity" type="text" value="1" class="form-control form-control-sm text-center border-0" readonly>
                         <div class="input-group-btn">
-                            <button type="button"
-                                    class="btn btn-sm btn-plus rounded-circle bg-light border">
+                            <button type="button" class="btn btn-sm btn-plus rounded-circle bg-light border">
                                 <i class="fa fa-plus"></i>
                             </button>
                         </div>
                     </div>
-
-                    <!-- Add‑to‑Cart button -->
                     <button type="submit" class="btn btn-primary btn-lg font-weight-bold px-4"><i class="fa fa-shopping-cart mr-2"></i>Add to Cart</button>
                 </form>
-
                 <button class="btn btn-outline-danger btn-lg font-weight-bold px-4 ml-2 wishlist-btn-detail" data-product-id="@Model.ProductId" data-toggle="tooltip" title="Favorite"><span class="wishlist-icon-detail">❤️</span></button>
             </div>
             <div class="mb-4">
@@ -97,6 +97,7 @@
         <div class="row px-xl-5">
             @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.Related)
             {
+                decimal relPrice = (decimal)(product.UnitPrice ?? 0);
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
                     <div class="product-item bg-light mb-4 rounded shadow-sm">
                         <div class="product-img position-relative overflow-hidden">
@@ -108,7 +109,7 @@
                         <div class="text-center py-4">
                             <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
+                                <h5>@(relPrice.ToString("#,##0", vi)) VNĐ</h5>
                             </div>
                         </div>
                     </div>
@@ -125,6 +126,7 @@
         <div class="row px-xl-5">
             @foreach (var product in (IEnumerable<DAL_Group4_E_Commerce.Models.Product>)ViewBag.SameSupplier)
             {
+                decimal supPrice = (decimal)(product.UnitPrice ?? 0);
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
                     <div class="product-item bg-light mb-4 rounded shadow-sm">
                         <div class="product-img position-relative overflow-hidden">
@@ -136,7 +138,7 @@
                         <div class="text-center py-4">
                             <a class="h6 text-decoration-none text-truncate" href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.ProductName</a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
-                                <h5>@(product.UnitPrice?.ToString("C0") ?? "")</h5>
+                                <h5>@(supPrice.ToString("#,##0", vi)) VNĐ</h5>
                             </div>
                         </div>
                     </div>
