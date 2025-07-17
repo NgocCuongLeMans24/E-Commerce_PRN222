@@ -8,7 +8,7 @@ namespace ViewModels
         public List<Customer> Customers { get; set; } = new List<Customer>();
         public int TotalCount { get; set; }
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int PageSize { get; set; } = 5;
         public string SearchTerm { get; set; } = string.Empty;
         public string StatusFilter { get; set; } = "All"; // All, Active, Inactive
         public string SortBy { get; set; } = "FullName"; // FullName, Email, BirthDate

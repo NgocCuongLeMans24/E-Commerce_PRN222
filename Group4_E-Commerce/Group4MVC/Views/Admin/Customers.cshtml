@@ -5,7 +5,7 @@
 }
 
 @section Styles {
-        <link rel="stylesheet" href="~/css/customer-management/index.css" />
+    <link rel="stylesheet" href="~/css/customer-management/index.css" />
 }
 
 <div class="management-container">
@@ -17,14 +17,6 @@
                 ➕ Add New Customer
             </button>
         </div>
-
-        <!-- Success Message -->
-        @if (TempData["SuccessMessage"] != null)
-        {
-                <div class="success-message">
-                    ✅ @TempData["SuccessMessage"]
-                </div>
-        }
 
         <!-- Filters -->
         <div class="filters-card">
@@ -116,11 +108,14 @@
                                             <button type="button" class="btn-sm btn-edit" onclick="openCustomerModal('@customer.CustomerId')">
                                                 ✏️ Edit
                                             </button>
+                                            <div>
+                                            @Html.AntiForgeryToken()
                                             <button type="button" 
                                                     class="btn-sm btn-toggle @((bool)customer.IsActive ? "deactivate" : "")"
                                                     onclick="toggleCustomerStatus('@customer.CustomerId', @customer.IsActive.ToString().ToLower())">
                                             @((bool)customer.IsActive ? "🚫 Deactivate" : "✅ Activate")
                                             </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -191,12 +186,57 @@
 
 @section Scripts {
         <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <text>
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: '@TempData["SuccessMessage"]',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    </text>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <text>
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: '@TempData["ErrorMessage"]',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    </text>
+                }
+            });
+
+            function loadCss(href) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = href;
+                document.head.appendChild(link);
+            }
+
             function openCustomerModal(customerId = null) {
                 fetch(`@Url.Action("GetCustomerModal", "Admin")?id=${customerId || ''}`)
                     .then(response => response.text())
                     .then(html => {
                         document.getElementById('modalContainer').innerHTML = html;
                         const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+                        if (customerId == null) {
+                            loadCss('/css/customer-management/create.css');
+                        }
+                        else {
+                            loadCss('/css/customer-management/edit.css');
+                        }
                         modal.show();
                     })
                     .catch(error => {
@@ -206,31 +246,152 @@
             }
 
             function toggleCustomerStatus(customerId, isActive) {
+                //event.preventDefault();
                 const action = isActive ? 'deactivate' : 'activate';
+                const token = $('input[name="__RequestVerificationToken"]').val();
                 const confirmMessage = `Are you sure you want to ${action} this customer?`;
 
-                if (confirm(confirmMessage)) {
-                    fetch('@Url.Action("ToggleCustomerStatus", "Admin")', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                Swal.fire({
+                  title: confirmMessage,
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#3085d6",
+                  cancelButtonColor: "#d33",
+                  confirmButtonText: "Yes"
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("ToggleCustomerStatus", "Admin")',
+                        type: 'POST',
+                        data: {
+                            __RequestVerificationToken: token,
+                            id: customerId
                         },
-                        body: `id=${encodeURIComponent(customerId)}`
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
+                        success: function (res) {
+                            if (res.success) {
+                                location.reload();
+                            } else {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: res.message,
+                                    showConfirmButton: false,
+                                    timer: 5000,
+                                    timerProgressBar: true
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: 'An error occurred while deleting the employee.',
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while updating the customer status.');
                     });
+                  }
+                });
+
+                
+            }
+
+            function submitCustomerForm() {
+                const form = document.getElementById('createCustomerForm');
+                const formData = new FormData(form);
+                $(form).find('.validation-error').remove();
+
+                fetch('@Url.Action("CreateCustomerModal", "Admin")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(async response => {
+                    const contentType = response.headers.get('content-type');
+
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+
+                        if (data.success) {
+                            $('#customerModal').modal('hide');
+                            location.reload();
+                        } else if (!data.success) {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
+                            if (data.errors) {
+                                console.log('Validation errors:', data.errors);
+                            }
+                        }
+                    }
+                    else {
+                        const html = await response.text();
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.getElementById('modalContainer').innerHTML = html;
+
+                        const modalElement = document.getElementById('customerModal');
+                        const bsModal = new bootstrap.Modal(modalElement);
+
+                        bsModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'An error occurred while creating the customer.',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                });
+            }
+
+            // Set default birth date to 18 years ago
+            document.addEventListener('DOMContentLoaded', function() {
+                const birthDateInput = document.querySelector('input[name="BirthDate"]');
+                if (birthDateInput && !birthDateInput.value) {
+                    const eighteenYearsAgo = new Date();
+                    eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+                    birthDateInput.value = eighteenYearsAgo.toISOString().split('T')[0];
                 }
+            });
+
+            function submitEditCustomerForm() {
+                const form = document.getElementById('editCustomerForm');
+                const formData = new FormData(form);
+
+                fetch('@Url.Action("EditCustomerModal", "Admin")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        $('#customerModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        if (data.errors) {
+                            console.log('Validation errors:', data.errors);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the customer.');
+                });
             }
         </script>
 }

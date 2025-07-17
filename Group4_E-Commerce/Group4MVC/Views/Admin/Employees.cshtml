@@ -18,14 +18,6 @@
             </button>
         </div>
 
-        <!-- Success Message -->
-        @if (TempData["SuccessMessage"] != null)
-        {
-                <div class="success-message">
-                    ✅ @TempData["SuccessMessage"]
-                </div>
-        }
-
         <!-- Filters -->
         <div class="filters-card">
             <form method="get" asp-action="Employees">
@@ -73,37 +65,37 @@
                     <tbody>
                         @foreach (var employee in Model.Employees)
                         {
-                                <tr>
-                                    <td>
-                                        <div class="employee-info">
-                                            <div class="employee-avatar">
-                                            @employee.FullName.Substring(0, 1).ToUpper()
-                                            </div>
-                                            <div class="employee-details">
-                                                <div class="employee-name">@employee.FullName</div>
-                                                <div class="employee-id">@employee.EmployeeId</div>
-                                            </div>
+                            <tr>
+                                <td>
+                                    <div class="employee-info">
+                                        <div class="employee-avatar">
+                                        @employee.FullName.Substring(0, 1).ToUpper()
                                         </div>
-                                    </td>
-                                    <td>@employee.Email</td>
-                                    <td>
-                                        <span class="role-badge">
-                                            👨‍💼 Employee
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button type="button" class="btn-sm btn-edit" onclick="openEmployeeModal('@employee.EmployeeId')">
-                                                ✏️ Edit
-                                            </button>
-                                            <button type="button" 
-                                                    class="btn-sm btn-delete"
-                                                    onclick="deleteEmployee('@employee.EmployeeId', '@employee.FullName')">
-                                                🗑️ Delete
-                                            </button>
+                                        <div class="employee-details">
+                                            <div class="employee-name">@employee.FullName</div>
+                                            <div class="employee-id">@employee.EmployeeId</div>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </td>
+                                <td>@employee.Email</td>
+                                <td>
+                                    <span class="role-badge">
+                                        👨‍💼 Employee
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button type="button" class="btn-sm btn-edit" onclick="openEmployeeModal('@employee.EmployeeId')">
+                                            ✏️ Edit
+                                        </button>
+                                        <button type="button" 
+                                                class="btn-sm btn-delete"
+                                                onclick="deleteEmployee('@employee.EmployeeId', '@employee.FullName')">
+                                            🗑️ Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>
@@ -112,52 +104,52 @@
             <!-- Pagination -->
             @if (Model.TotalCount > Model.PageSize)
             {
-                    <div class="pagination">
-                    @{
-                        var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
-                        var currentPage = Model.PageNumber;
-                    }
+                <div class="pagination">
+                @{
+                    var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+                    var currentPage = Model.PageNumber;
+                }
 
-                    @if (currentPage > 1)
+                @if (currentPage > 1)
+                {
+                    <a href="@Url.Action("Employees", new { 
+                        pageNumber = currentPage - 1, 
+                        pageSize = Model.PageSize,
+                        searchTerm = Model.SearchTerm,
+                        sortBy = Model.SortBy,
+                        sortOrder = Model.SortOrder
+                    })">← Previous</a>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    if (i == currentPage)
                     {
-                                <a href="@Url.Action("Employees", new { 
-                            pageNumber = currentPage - 1, 
+                        <span class="current">@i</span>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Employees", new { 
+                            pageNumber = i, 
                             pageSize = Model.PageSize,
                             searchTerm = Model.SearchTerm,
                             sortBy = Model.SortBy,
                             sortOrder = Model.SortOrder
-                        })">← Previous</a>
+                        })">@i</a>
                     }
+                }
 
-                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
-                    {
-                        if (i == currentPage)
-                        {
-                                        <span class="current">@i</span>
-                        }
-                        else
-                        {
-                                        <a href="@Url.Action("Employees", new { 
-                                pageNumber = i, 
-                                pageSize = Model.PageSize,
-                                searchTerm = Model.SearchTerm,
-                                sortBy = Model.SortBy,
-                                sortOrder = Model.SortOrder
-                            })">@i</a>
-                        }
-                    }
-
-                    @if (currentPage < totalPages)
-                    {
-                                <a href="@Url.Action("Employees", new { 
-                            pageNumber = currentPage + 1, 
-                            pageSize = Model.PageSize,
-                            searchTerm = Model.SearchTerm,
-                            sortBy = Model.SortBy,
-                            sortOrder = Model.SortOrder
-                        })">Next →</a>
-                    }
-                    </div>
+                @if (currentPage < totalPages)
+                {
+                    <a href="@Url.Action("Employees", new { 
+                        pageNumber = currentPage + 1, 
+                        pageSize = Model.PageSize,
+                        searchTerm = Model.SearchTerm,
+                        sortBy = Model.SortBy,
+                        sortOrder = Model.SortOrder
+                    })">Next →</a>
+                }
+                </div>
             }
         </div>
     </div>
@@ -166,8 +158,200 @@
 <!-- Modal Container -->
 <div id="modalContainer"></div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-danger text-danger d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(220,53,69,0.1) !important;">
+                        <i class="fas fa-exclamation-triangle fa-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h6 class="mb-1">Delete Employee</h6>
+                        <p class="mb-0 text-muted small">This action cannot be undone.</p>
+                    </div>
+                </div>
+                <p class="text-dark mb-4">
+                    Are you sure you want to delete the employee "<span id="employeeName" class="font-weight-semibold"></span>"?
+                </p>
+                <div class="d-flex justify-content-end">
+                    <form>
+                        @Html.AntiForgeryToken()
+                        <input id="deleteId" type="hidden" />
+                        <button type="button" class="btn btn-outline-secondary mr-2" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i>Cancel
+                        </button>
+                        <button id="deleteLink" onclick="confirmDelete(event)" class="btn btn-danger">
+                            <i class="fas fa-trash mr-1"></i>Delete Employee
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
         <script>
+
+            document.addEventListener("DOMContentLoaded", function () {
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <text>
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: '@TempData["SuccessMessage"]',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    </text>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <text>
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: '@TempData["ErrorMessage"]',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    </text>
+                }
+            });
+
+            function submitEmployeeForm() {
+                const form = document.getElementById('createEmployeeForm');
+                const formData = new FormData(form);
+                $(form).find('.validation-error').remove();
+
+                fetch('@Url.Action("CreateEmployeeModal", "Admin")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(async response => {
+                    const contentType = response.headers.get('content-type');
+
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+
+                        if (data.success) {
+                            $('#employeeModal').modal('hide');
+                            location.reload();
+                        } else if (!data.success) {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
+                            if (data.errors) {
+                                console.log('Validation errors:', data.errors);
+                            }
+                        }
+                    }
+                    else {
+                        const html = await response.text();
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.getElementById('modalContainer').innerHTML = html;
+
+                        const modalElement = document.getElementById('employeeModal');
+                        const bsModal = new bootstrap.Modal(modalElement);
+
+                        bsModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'An error occurred while creating the employee.',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                });
+            }
+
+            function submitEditEmployeeForm() {
+                const form = document.getElementById('editEmployeeForm');
+                const formData = new FormData(form);
+                $(form).find('.validation-error').remove();
+
+                fetch('@Url.Action("EditEmployeeModal", "Admin")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(async response => {
+                    const contentType = response.headers.get('content-type');
+
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+
+                        if (data.success) {
+                            $('#employeeModal').modal('hide');
+                            location.reload();
+                        } else if (!data.success) {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
+                            if (data.errors) {
+                                console.log('Validation errors:', data.errors);
+                            }
+                        }
+                    }
+                    else {
+                        const html = await response.text();
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.getElementById('modalContainer').innerHTML = html;
+
+                        const modalElement = document.getElementById('employeeModal');
+                        const bsModal = new bootstrap.Modal(modalElement);
+
+                        bsModal.show();
+                }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'An error occurred while creating the employee.',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                });
+            }
+
             function openEmployeeModal(employeeId = null) {
                 fetch(`@Url.Action("GetEmployeeModal", "Admin")?id=${employeeId || ''}`)
                     .then(response => response.text())
@@ -182,31 +366,55 @@
                     });
             }
 
-            function deleteEmployee(employeeId, employeeName) {
-                const confirmMessage = `Are you sure you want to delete employee "${employeeName}"? This action cannot be undone.`;
 
-                if (confirm(confirmMessage)) {
-                    fetch('@Url.Action("DeleteEmployee", "Admin")', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                        },
-                        body: `id=${encodeURIComponent(employeeId)}`
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
+
+            function deleteEmployee(employeeId, employeeName) {
+                document.getElementById('employeeName').textContent = employeeName;
+                document.getElementById('deleteId').value = employeeId;
+
+                var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                deleteModal.show();
+            }
+
+            function confirmDelete(event) {
+                event.preventDefault();
+                const employeeId = document.getElementById('deleteId').value;
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '@Url.Action("DeleteEmployee", "Admin")',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: token,
+                        id: employeeId
+                    },
+                    success: function (res) {
+                        if (res.success) {
                             location.reload();
                         } else {
-                            alert('Error: ' + data.message);
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: res.message,
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the employee.');
-                    });
-                }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'An error occurred while deleting the employee.',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    }
+                });
             }
         </script>
 }

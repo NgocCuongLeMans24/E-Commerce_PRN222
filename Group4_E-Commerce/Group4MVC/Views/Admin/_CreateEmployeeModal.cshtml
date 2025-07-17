@@ -1,0 +1,142 @@
+﻿@model ViewModels.CreateEmployeeViewModel
+
+<style>
+    .create-employee-modal-wrapper .modal-content {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .create-employee-modal-wrapper .modal-header {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+        border-radius: 1rem 1rem 0 0;
+        border-bottom: none;
+        padding: 1.5rem;
+    }
+
+    .create-employee-modal-wrapper .modal-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .create-employee-modal-wrapper .modal-body {
+        padding: 2rem;
+    }
+
+    .create-employee-modal-wrapper .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .create-employee-modal-wrapper .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .create-employee-modal-wrapper .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        color: #111827;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+        .create-employee-modal-wrapper .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #8b5cf6;
+            border-color: transparent;
+        }
+
+    .create-employee-modal-wrapper .validation-error {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .create-employee-modal-wrapper .btn-primary {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .create-employee-modal-wrapper .btn-primary:hover {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        }
+
+    .create-employee-modal-wrapper .btn-secondary {
+        background: #6b7280;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-left: 0.5rem;
+    }
+
+        .create-employee-modal-wrapper .btn-secondary:hover {
+            background: #4b5563;
+        }
+</style>
+
+<div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true"> 
+    <div class="modal-dialog modal-lg"> 
+         <div class="modal-content create-employee-modal-wrapper"> 
+             <div class="modal-header"> 
+                 <h5 class="modal-title" id="employeeModalLabel"> 
+                     👨‍💼 Create New Employee 
+                 </h5> 
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
+                     <span aria-hidden="true">&times;</span> 
+                 </button> 
+             </div> 
+             <div class="modal-body"> 
+                 <form id="createEmployeeForm"> 
+                     @Html.AntiForgeryToken() 
+
+                     <div class="form-group"> 
+                         <label asp-for="EmployeeID" class="form-label">Employee ID *</label> 
+                         <input asp-for="EmployeeID" type="text" class="form-input" placeholder="Enter unique employee ID"> 
+                         <span asp-validation-for="EmployeeID" class="validation-error"></span> 
+                     </div> 
+
+                     <div class="form-group"> 
+                         <label asp-for="FullName" class="form-label">Full Name *</label> 
+                         <input asp-for="FullName" type="text" class="form-input" placeholder="Enter employee's full name"> 
+                         <span asp-validation-for="FullName" class="validation-error"></span> 
+                     </div> 
+
+                     <div class="form-group"> 
+                         <label asp-for="Email" class="form-label">Email Address *</label> 
+                         <input asp-for="Email" type="email" autocomplete="email" class="form-input" placeholder="employee@company.com"> 
+                         <span asp-validation-for="Email" class="validation-error"></span> 
+                     </div> 
+
+                     <div class="form-group"> 
+                         <label asp-for="Password" class="form-label">Password *</label> 
+                         <input asp-for="Password" type="password" autocomplete="new-password" class="form-input" placeholder="Create a password"> 
+                         <span asp-validation-for="Password" class="validation-error"></span> 
+                     </div> 
+                 </form> 
+             </div> 
+             <div class="modal-footer"> 
+                 <button type="button" class="btn-secondary" data-dismiss="modal">Cancel</button> 
+                 <button type="button" class="btn-primary" onclick="submitEmployeeForm()">Create Employee</button> 
+             </div> 
+         </div> 
+     </div>
+ </div>
