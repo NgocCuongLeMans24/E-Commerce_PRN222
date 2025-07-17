@@ -4,29 +4,16 @@
 @{
     ViewData["Title"] = "Shopping Cart";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
+    decimal grandTotal = 0;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/cart.css" />
 }
 
-<!-- Breadcrumb -->
-<div class="breadcrumb-section">
-    <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i> Home</a></li>
-                <li class="breadcrumb-item"><a href="/Product">Products</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Shopping Cart</li>
-            </ol>
-        </nav>
-    </div>
-</div>
-
-<!-- Cart Section -->
 <div class="cart-section">
     <div class="container">
-        <!-- Cart Header -->
         <div class="cart-header">
             <h1 class="page-title">
                 <i class="fas fa-shopping-cart"></i>
@@ -40,7 +27,6 @@
 
         @if (!Model.Any())
         {
-            <!-- Empty Cart -->
             <div class="empty-cart">
                 <div class="empty-cart-icon">
                     <i class="fas fa-shopping-cart"></i>
@@ -56,7 +42,6 @@
         else
         {
             <div class="row">
-                <!-- Cart Items -->
                 <div class="col-lg-8">
                     <div class="cart-items">
                         <div class="cart-items-header">
@@ -76,9 +61,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @{
-                                        decimal grandTotal = 0;
-                                    }
                                     @foreach (var item in Model)
                                     {
                                         var subTotal = item.UnitPrice * item.Quantity;
@@ -92,7 +74,7 @@
                                                     </div>
                                                     <div class="product-text">
                                                         <h4 class="product-name">@item.ProductName</h4>
-                                                        <p class="product-category">Electronics</p>
+                                                        <p class="product-category">Category</p>
                                                         <div class="product-rating">
                                                             <div class="stars">
                                                                 <i class="fas fa-star"></i>
@@ -107,31 +89,24 @@
                                                 </div>
                                             </td>
                                             <td class="price-cell">
-                                                <span class="price">@item.UnitPrice.ToString("C0")</span>
+                                                <span class="price">@item.UnitPrice.ToString("#,##0", vi) VNĐ</span>
                                             </td>
                                             <td class="quantity-cell">
                                                 <div class="quantity-controls">
-                                                    <a href="@Url.Action("UpdateQuantity", new { id = item.ProductId, delta = -1 })"
-                                                       class="qty-btn minus"
-                                                       title="Decrease quantity">
+                                                    <a href="@Url.Action("UpdateQuantity", new { id = item.ProductId, delta = -1 })" class="qty-btn minus">
                                                         <i class="fas fa-minus"></i>
                                                     </a>
                                                     <span class="qty-display">@item.Quantity</span>
-                                                    <a href="@Url.Action("UpdateQuantity", new { id = item.ProductId, delta = 1 })"
-                                                       class="qty-btn plus"
-                                                       title="Increase quantity">
+                                                    <a href="@Url.Action("UpdateQuantity", new { id = item.ProductId, delta = 1 })" class="qty-btn plus">
                                                         <i class="fas fa-plus"></i>
                                                     </a>
                                                 </div>
                                             </td>
                                             <td class="total-cell">
-                                                <span class="total-price">@subTotal.ToString("C0")</span>
+                                                <span class="total-price">@subTotal.ToString("#,##0", vi) VNĐ</span>
                                             </td>
                                             <td class="action-cell">
-                                                <a href="@Url.Action("Remove", new { id = item.ProductId })"
-                                                   class="remove-btn"
-                                                   title="Remove item"
-                                                   onclick="return confirm('Are you sure you want to remove this item?')">
+                                                <a href="@Url.Action("Remove", new { id = item.ProductId })" class="remove-btn" onclick="return confirm('Are you sure you want to remove this item?')">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             </td>
@@ -141,7 +116,6 @@
                             </table>
                         </div>
 
-                        <!-- Cart Actions -->
                         <div class="cart-actions">
                             <a href="@Url.Action("Index", "Product")" class="btn-secondary">
                                 <i class="fas fa-arrow-left"></i>
@@ -156,7 +130,6 @@
                     </div>
                 </div>
 
-                <!-- Cart Summary -->
                 <div class="col-lg-4">
                     <div class="cart-summary">
                         <div class="summary-header">
@@ -166,7 +139,7 @@
                         <div class="summary-content">
                             <div class="summary-row">
                                 <span class="label">Subtotal (@Model.Count() items)</span>
-                                <span class="value">@grandTotal.ToString("C0")</span>
+                                <span class="value">@grandTotal.ToString("#,##0", vi) VNĐ</span>
                             </div>
 
                             <div class="summary-row">
@@ -176,19 +149,19 @@
 
                             <div class="summary-row">
                                 <span class="label">Tax</span>
-                                <span class="value">@((grandTotal * 0.1m).ToString("C0"))</span>
+                                <span class="value">@((grandTotal * 0.1m).ToString("#,##0", vi)) VNĐ</span>
                             </div>
 
                             <div class="summary-divider"></div>
 
                             <div class="summary-row total-row">
                                 <span class="label">Total</span>
-                                <span class="value">@((grandTotal * 1.1m).ToString("C0"))</span>
+                                <span class="value">@((grandTotal * 1.1m).ToString("#,##0", vi)) VNĐ</span>
                             </div>
                         </div>
 
                         <div class="summary-actions">
-                            <a href="@Url.Action("Checkout", "Order")" class="btn-checkout">
+                            <a href="@Url.Action("Checkout", "Cart")" class="btn-checkout">
                                 <i class="fas fa-credit-card"></i>
                                 Proceed to Checkout
                             </a>
@@ -204,7 +177,6 @@
                             </div>
                         </div>
 
-                        <!-- Promo Code -->
                         <div class="promo-section">
                             <h4>Have a promo code?</h4>
                             <div class="promo-form">
@@ -213,64 +185,12 @@
                             </div>
                         </div>
 
-                        <!-- Security Badge -->
                         <div class="security-badge">
                             <i class="fas fa-shield-alt"></i>
                             <div>
                                 <strong>Secure Checkout</strong>
                                 <span>SSL encrypted payment</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recommended Products -->
-            <div class="recommended-section">
-                <h3 class="section-title">You might also like</h3>
-                <div class="recommended-products">
-                    <!-- Placeholder for recommended products -->
-                    <div class="recommended-item">
-                        <div class="product-image">
-                            <img src="/placeholder.svg?height=150&width=150" alt="Product">
-                        </div>
-                        <div class="product-info">
-                            <h4>Related Product 1</h4>
-                            <div class="price">$99.99</div>
-                            <button class="btn-add-quick">Quick Add</button>
-                        </div>
-                    </div>
-
-                    <div class="recommended-item">
-                        <div class="product-image">
-                            <img src="/placeholder.svg?height=150&width=150" alt="Product">
-                        </div>
-                        <div class="product-info">
-                            <h4>Related Product 2</h4>
-                            <div class="price">$149.99</div>
-                            <button class="btn-add-quick">Quick Add</button>
-                        </div>
-                    </div>
-
-                    <div class="recommended-item">
-                        <div class="product-image">
-                            <img src="/placeholder.svg?height=150&width=150" alt="Product">
-                        </div>
-                        <div class="product-info">
-                            <h4>Related Product 3</h4>
-                            <div class="price">$79.99</div>
-                            <button class="btn-add-quick">Quick Add</button>
-                        </div>
-                    </div>
-
-                    <div class="recommended-item">
-                        <div class="product-image">
-                            <img src="/placeholder.svg?height=150&width=150" alt="Product">
-                        </div>
-                        <div class="product-info">
-                            <h4>Related Product 4</h4>
-                            <div class="price">$199.99</div>
-                            <button class="btn-add-quick">Quick Add</button>
                         </div>
                     </div>
                 </div>
@@ -283,39 +203,28 @@
     <script>
         function clearCart() {
             if (confirm('Are you sure you want to clear your entire cart?')) {
-                // Implement clear cart functionality
                 window.location.href = '@Url.Action("Clear", "Cart")';
             }
         }
 
-        // Quantity update with AJAX (optional enhancement)
-        $('.qty-btn').click(function(e) {
+        $('.qty-btn').click(function (e) {
             e.preventDefault();
             const url = $(this).attr('href');
-
-            // Add loading state
             $(this).addClass('loading');
-
-            // You can implement AJAX update here
             window.location.href = url;
         });
 
-        // Promo code functionality
-        $('.btn-apply').click(function() {
+        $('.btn-apply').click(function () {
             const promoCode = $('.promo-input').val();
             if (promoCode.trim() === '') {
                 alert('Please enter a promo code');
                 return;
             }
-
-            // Implement promo code logic
             alert('Promo code functionality would be implemented here');
         });
 
-        // Quick add functionality for recommended products
-        $('.btn-add-quick').click(function() {
+        $('.btn-add-quick').click(function () {
             $(this).text('Adding...').prop('disabled', true);
-
             setTimeout(() => {
                 $(this).text('Added!').removeClass('btn-add-quick').addClass('btn-added');
                 setTimeout(() => {
@@ -324,17 +233,6 @@
             }, 1000);
         });
 
-        // Auto-save cart (optional)
-        let cartTimer;
-        function saveCart() {
-            clearTimeout(cartTimer);
-            cartTimer = setTimeout(() => {
-                // Implement auto-save functionality
-                console.log('Cart auto-saved');
-            }, 2000);
-        }
-
-        // Initialize tooltips
         $(function () {
             $('[title]').tooltip();
         });

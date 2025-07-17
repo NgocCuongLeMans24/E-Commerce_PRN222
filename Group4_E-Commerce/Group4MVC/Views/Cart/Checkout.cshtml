@@ -1,0 +1,121 @@
+﻿@using System.Linq
+@using System.Globalization
+@using GUI_Group4_ECommerce.ViewModels
+@model IEnumerable<CartItem>
+
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var vi = new CultureInfo("vi-VN");   // to format numbers → 10.000 VNĐ
+    double subTotal = Model.Sum(x => x.Total);
+    double shipping = 10000;                      // fixed shipping fee in VND
+    double grand = subTotal + shipping;
+}
+
+<div class="container py-5">
+    <h1 class="mb-4">Billing details</h1>
+
+    <form asp-action="Checkout" asp-controller="Cart" method="post" class="row g-5">
+        @Html.AntiForgeryToken()
+
+        <div class="col-lg-7">
+            <div class="form-check mb-4">
+                <input type="checkbox" id="sameAsCustomer" name="SameAsCustomer" value="true" class="form-check-input" />
+                <input type="hidden" name="SameAsCustomer" value="false" />
+                <label class="form-check-label" for="sameAsCustomer">Same as customer details?</label>
+            </div>
+
+            <div class="form-group mb-3 delivery-info">
+                <label>Full name <span class="text-danger">*</span></label>
+                <input name="FullName" id="FullName" class="form-control" required />
+            </div>
+
+            <div class="form-group mb-3 delivery-info">
+                <label>Phone <span class="text-danger">*</span></label>
+                <input name="Phone" id="Phone" class="form-control" required />
+            </div>
+
+            <div class="form-group mb-3 delivery-info">
+                <label>Address <span class="text-danger">*</span></label>
+                <input name="Address" id="Address" class="form-control" required />
+            </div>
+
+            <div class="form-group mb-4">
+                <label>Note</label>
+                <textarea name="Note" rows="3" class="form-control" required></textarea>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="text-uppercase mb-3">Order summary</h5>
+
+                    @foreach (var i in Model)
+                    {
+                        <div class="d-flex justify-content-between small">
+                            <span>
+                                <img src="@i.Image" style="width:40px;height:40px;border-radius:50%" />
+                                @i.ProductName × @i.Quantity
+                            </span>
+                            <strong>@(i.Total.ToString("#,##0", vi)) VNĐ</strong>
+                        </div>
+                    }
+
+                    <hr />
+                    <div class="d-flex justify-content-between"><span>Subtotal</span><strong>@(subTotal.ToString("#,##0", vi)) VNĐ</strong></div>
+                    <div class="d-flex justify-content-between"><span>Shipping</span><strong>@(shipping.ToString("#,##0", vi)) VNĐ</strong></div>
+                    <hr />
+                    <div class="d-flex justify-content-between h5"><span>Total</span><strong>@(grand.ToString("#,##0", vi)) VNĐ</strong></div>
+                </div>
+            </div>
+
+            <!-- COD input -->
+            <input type="submit"
+                   name="payment"
+                   value="Place order (COD)"
+                   class="btn btn-secondary btn-block mb-2" />
+
+            <!-- VNPay input -->
+            <input type="submit"
+                   name="payment"
+                   value="Pay with VNPay"
+                   class="btn btn-primary btn-block mb-2"
+                   style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGqg3OFoapBc2qLOu-Fl6_Ep4vFlzqTdK5rA&s');background-repeat:no-repeat;background-position:12px center;background-size:20px 20px;padding-left:40px;" />
+
+        </div>
+    </form>
+    <div asp-validation-summary="All" class="text-danger"></div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            const custName  = '@(ViewBag.CustomerName ?? "")';
+            const custPhone = '@(ViewBag.CustomerPhone ?? "")';
+            const custAddr  = '@(ViewBag.CustomerAddr ?? "")';
+
+            const $box  = $('#sameAsCustomer');
+            const $info = $('.delivery-info');
+
+            function sync() {
+                const on = $box.is(':checked');
+                $info.toggleClass('d-none', on);
+
+                if (on) {
+                    $('#FullName').val(custName).prop({ readonly:true, disabled:true });
+                    $('#Phone')   .val(custPhone).prop({ readonly:true, disabled:true });
+                    $('#Address') .val(custAddr) .prop({ readonly:true, disabled:true });
+                } else {
+                    $('#FullName,#Phone,#Address')
+                        .prop({ readonly:false, disabled:false })
+                        .val('');
+                }
+            }
+            $box.on('change', sync);
+            sync();
+        });
+    </script>
+}

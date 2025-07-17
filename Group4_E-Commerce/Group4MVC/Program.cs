@@ -2,6 +2,8 @@ using DAL_Group4_E_Commerce.Models;
 using BUS_Group4_E_Commerce;
 using DAL_Group4_E_Commerce.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using DAL_Group4_E_Commerce.Models;
+using GUI_Group4_ECommerce.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group4MVC
@@ -25,6 +27,9 @@ namespace Group4MVC
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+            builder.Services.AddSingleton<IVnPayService,VnPayService>();
+
+
             // Add Authentication Services
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -56,6 +61,10 @@ namespace Group4MVC
                 options.AddPolicy("CustomerOnly", policy => policy.RequireClaim("UserType", "Customer"));
                 options.AddPolicy("EmployeeOnly", policy => policy.RequireClaim("UserType", "Employee"));
             });
+
+            builder.Services.AddSingleton<IVnPayService,VnPayService>();
+
+
 
             var app = builder.Build();
 
