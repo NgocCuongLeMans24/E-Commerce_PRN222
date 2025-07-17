@@ -5,7 +5,7 @@
 }
 
 @section Styles {
-<link rel="stylesheet" href="~/css/admin.css" />
+    <link rel="stylesheet" href="~/css/admin.css" />
 }
 
 <div class="dashboard-container">
@@ -156,14 +156,54 @@
 
 @section Scripts {
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <text>
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: '@TempData["SuccessMessage"]',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                </text>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <text>
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: '@TempData["ErrorMessage"]',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                </text>
+            }
+        });
+
+        function loadCss(href) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+        }
+
+
         function openCustomerModal(customerId = null) {
             fetch(`@Url.Action("GetCustomerModal", "Admin")?id=${customerId || ''}`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('modalContainer').innerHTML = html;
                     const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+                    loadCss('/css/customer-management/create.css');
                     modal.show();
-                    //$('#customerModal').modal('show');
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -183,6 +223,122 @@
                     console.error('Error:', error);
                     alert('Failed to load employee form.');
                 });
+        }
+
+        function submitCustomerForm() {
+            const form = document.getElementById('createCustomerForm');
+            const formData = new FormData(form);
+            $(form).find('.validation-error').remove();
+
+            fetch('@Url.Action("CreateCustomerModal", "Admin")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async response => {
+                const contentType = response.headers.get('content-type');
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+
+                    if (data.success) {
+                        $('#customerModal').modal('hide');
+                        location.reload();
+                    } else if (!data.success) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: data.message,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                        if (data.errors) {
+                            console.log('Validation errors:', data.errors);
+                        }
+                    }
+                }
+                else {
+                    const html = await response.text();
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.getElementById('modalContainer').innerHTML = html;
+
+                    const modalElement = document.getElementById('customerModal');
+                    const bsModal = new bootstrap.Modal(modalElement);
+
+                    bsModal.show();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'An error occurred while creating the customer.',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            });
+        }
+
+        function submitEmployeeForm() {
+            const form = document.getElementById('createEmployeeForm');
+            const formData = new FormData(form);
+            $(form).find('.validation-error').remove();
+
+            fetch('@Url.Action("CreateEmployeeModal", "Admin")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async response => {
+                const contentType = response.headers.get('content-type');
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+
+                    if (data.success) {
+                        $('#employeeModal').modal('hide');
+                        location.reload();
+                    } else if (!data.success) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: data.message,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                        if (data.errors) {
+                            console.log('Validation errors:', data.errors);
+                        }
+                    }
+                }
+                else {
+                    const html = await response.text();
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.getElementById('modalContainer').innerHTML = html;
+
+                    const modalElement = document.getElementById('employeeModal');
+                    const bsModal = new bootstrap.Modal(modalElement);
+
+                    bsModal.show();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'An error occurred while creating the employee.',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            });
         }
     </script>
 }

@@ -271,13 +271,16 @@ namespace Controllers
             {
                 result = await _customerService.DeactivateCustomerAsync(id);
                 message = result ? "Customer deactivated successfully!" : "Failed to deactivate customer.";
+                if (result) TempData["SuccessMessage"] = "Customer deactivated successfully!";
             }
             else
             {
                 result = await _customerService.ActivateCustomerAsync(id);
                 message = result ? "Customer activated successfully!" : "Failed to activate customer.";
+                if (result) TempData["SuccessMessage"] = "Customer activated successfully!";
             }
 
+            
             return Json(new { success = result, message = message });
         }
 
@@ -348,7 +351,7 @@ namespace Controllers
                     Gender = model.Gender,
                     BirthDate = model.BirthDate,
                     IsActive = model.IsActive,
-                    Photo = "Photo.gif",
+                    Photo = "default-avatar",
                     Role = 0,
                     RandomKey = Guid.NewGuid().ToString()
                 };
@@ -357,6 +360,7 @@ namespace Controllers
                 if (result)
                 {
                     await _emailService.SendWelcomeEmailAsync(customer.Email, customer.FullName);
+                    TempData["SuccessMessage"] = "Customer created successfully!";
                     return Json(new { success = true, message = "Customer created successfully!" });
                 }
                 else
@@ -365,8 +369,7 @@ namespace Controllers
                 }
             }
 
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            return Json(new { success = false, message = "Validation failed.", errors = errors });
+            return PartialView("_CreateCustomerModal", model);
         }
 
         [HttpPost]
@@ -399,6 +402,7 @@ namespace Controllers
                 var result = await _customerService.UpdateCustomerAsync(customer);
                 if (result)
                 {
+                    TempData["SuccessMessage"] = "Customer updated successfully!";
                     return Json(new { success = true, message = "Customer updated successfully!" });
                 }
                 else
@@ -407,8 +411,7 @@ namespace Controllers
                 }
             }
 
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            return Json(new { success = false, message = "Validation failed.", errors = errors });
+            return PartialView("_EditCustomerModal", model);
         }
 
         #endregion
@@ -574,6 +577,7 @@ namespace Controllers
             var result = await _employeeService.DeleteAsync(id);
             if (result)
             {
+                TempData["SuccessMessage"] = "Employee deleted successfully!";
                 return Json(new { success = true, message = "Employee deleted successfully!" });
             }
             else
@@ -639,6 +643,7 @@ namespace Controllers
                 var result = await _employeeService.CreateEmployeeAsync(employee, model.Password);
                 if (result)
                 {
+                    TempData["SuccessMessage"] = "Employee created successfully!";
                     return Json(new { success = true, message = "Employee created successfully!" });
                 }
                 else
@@ -646,9 +651,7 @@ namespace Controllers
                     return Json(new { success = false, message = "Failed to create employee. Please try again." });
                 }
             }
-
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            return Json(new { success = false, message = "Validation failed.", errors = errors });
+            return PartialView("_CreateEmployeeModal", model);
         }
 
         [HttpPost]
@@ -675,6 +678,7 @@ namespace Controllers
                 var result = await _employeeService.UpdateEmployeeAsync(employee);
                 if (result)
                 {
+                    TempData["SuccessMessage"] = "Employee created successfully!";
                     return Json(new { success = true, message = "Employee updated successfully!" });
                 }
                 else
@@ -683,8 +687,7 @@ namespace Controllers
                 }
             }
 
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            return Json(new { success = false, message = "Validation failed.", errors = errors });
+            return PartialView("_EditEmployeeModal", model);
         }
 
         #endregion
