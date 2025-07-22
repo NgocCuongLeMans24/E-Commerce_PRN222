@@ -131,7 +131,7 @@ namespace GUI_Group4_ECommerce.Controllers
                 CustomerId = customerId,
                 CustomerName = model.FullName ?? customer.FullName,
                 Address = model.Address ?? customer.Address,
-                PhoneNumber = model.Phone ?? customer.Phone,
+                Phone = model.Phone ?? customer.Phone,
                 OrderDate = DateTime.Now,
                 PaymentMethod = payment,
                 ShippingMethod = "GRAB",

@@ -36,7 +36,7 @@ namespace DAL_Group4_E_Commerce.Repository
 					o.OrderId.ToString().Contains(searchTerm) ||
 					o.CustomerId.Contains(searchTerm) ||
 					o.CustomerName.Contains(searchTerm) ||
-					o.PhoneNumber.Contains(searchTerm) ||
+					o.Phone.Contains(searchTerm) ||
 					o.Status.StatusName.Contains(searchTerm)
 				);
 			}
