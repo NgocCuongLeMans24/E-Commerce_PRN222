@@ -13,33 +13,42 @@ namespace Controllers
         private readonly IEmployeeService _employeeService;
         private readonly IPasswordHashingService _passwordHashingService;
         private readonly IEmailService _emailService;
+        private readonly IOrderService _orderService;
+        private readonly IProductService _productService;
 
-        public AdminController(
+		public AdminController(
             ICustomerService customerService,
             IEmployeeService employeeService,
             IPasswordHashingService passwordHashingService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IOrderService orderService,
+            IProductService productService)
         {
             _customerService = customerService;
             _employeeService = employeeService;
             _passwordHashingService = passwordHashingService;
             _emailService = emailService;
-        }
+            _orderService = orderService;
+            _productService = productService;
+		}
 
         public async Task<IActionResult> Index()
         {
             var customers = await _customerService.GetAllCustomersAsync();
             var employees = await _employeeService.GetAllEmployeesAsync();
             var activeCustomers = await _customerService.GetActiveCustomersAsync();
+            var orders = await _orderService.GetAllOrdersAsync(); 
+            var products =  _productService.GetAll();
 
-            var viewModel = new AdminDashboardViewModel
+
+			var viewModel = new AdminDashboardViewModel
             {
                 TotalCustomers = customers.Count(),
                 ActiveCustomers = activeCustomers.Count(),
                 InactiveCustomers = customers.Count() - activeCustomers.Count(),
                 TotalEmployees = employees.Count(),
-                TotalOrders = 0, // TODO: Implement when Order service is available
-                TotalProducts = 0, // TODO: Implement when Product service is available
+                TotalOrders = orders.Count(),
+				TotalProducts = products.Count(), // TODO: Implement when Product service is available
                 RecentCustomers = customers.OrderByDescending(c => c.CustomerId).Take(5).ToList(),
                 RecentEmployees = employees.OrderByDescending(e => e.EmployeeId).Take(5).ToList()
             };
@@ -690,6 +699,45 @@ namespace Controllers
             return PartialView("_EditEmployeeModal", model);
         }
 
-        #endregion
-    }
+		#endregion
+
+		#region Order Management
+
+        public async Task<IActionResult> Orders(OrderManagementViewModel model)
+        {
+            var orders = await _orderService.GetAllOrdersAsync();
+            // Apply search filter
+            if (!string.IsNullOrEmpty(model.SearchQuery))
+            {
+                orders = orders.Where(o =>
+					o.OrderId.ToString().Contains(model.SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    o.Customer.FullName.Contains(model.SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    o.Customer.Email.Contains(model.SearchQuery , StringComparison.OrdinalIgnoreCase));
+            }
+            // Apply sorting
+            orders = model.SortOrder.ToLower() switch
+            {
+                "customer" => model.SortOrder == "desc"
+                    ? orders.OrderByDescending(o => o.Customer.FullName)
+                    : orders.OrderBy(o => o.Customer.FullName),
+                "date" => model.SortOrder == "desc"
+                    ? orders.OrderByDescending(o => o.OrderDate)
+                    : orders.OrderBy(o => o.OrderDate),
+                _ => model.SortOrder == "desc"
+                    ? orders.OrderByDescending(o => o.OrderId)
+                    : orders.OrderBy(o => o.OrderId)
+            };
+            model.TotalItems = orders.Count();
+            // Apply pagination
+            var pagedOrders = orders
+                .Skip((model.CurrentPage - 1) * model.PageSize)
+                .Take(model.PageSize)
+                .ToList();
+            model.Orders = pagedOrders;
+
+            return View(model);
+		}
+
+		#endregion
+	}
 }
