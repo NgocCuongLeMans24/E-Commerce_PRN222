@@ -31,7 +31,7 @@ public partial class Order
 
     public string? Note { get; set; }
 
-    public string? Phone { get; set; }
+    public string? PhoneNumber { get; set; }
 
     public virtual Customer Customer { get; set; } = null!;
 

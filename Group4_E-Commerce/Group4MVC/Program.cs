@@ -46,12 +46,16 @@ namespace Group4MVC
             // Register Repositories
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-            // Register Services
-            builder.Services.AddScoped<IPasswordHashingService, PasswordHashingService>();
+			// Register Services
+			builder.Services.AddScoped<IPasswordHashingService, PasswordHashingService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+			builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             builder.Services.AddSingleton<IOtpService, OtpService>();

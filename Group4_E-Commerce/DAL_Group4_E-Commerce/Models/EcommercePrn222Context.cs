@@ -212,7 +212,7 @@ public partial class EcommercePrn222Context : DbContext
             entity.Property(e => e.PaymentMethod)
                 .HasMaxLength(50)
                 .HasDefaultValue("Cash");
-            entity.Property(e => e.Phone).HasMaxLength(24);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(24);
             entity.Property(e => e.RequiredDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
