@@ -1,0 +1,34 @@
+﻿@model IEnumerable<DAL_Group4_E_Commerce.Models.Order>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "My Orders";
+}
+
+<h2>My Orders</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Order Date</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.OrderDate?.ToString("dd/MM/yyyy")</td>
+                <td>@order.Status?.StatusName</td>
+                <td>@order.PaymentMethod</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" asp-action="Details" asp-route-id="@order.OrderId">View Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

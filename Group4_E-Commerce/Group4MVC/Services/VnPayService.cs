@@ -40,6 +40,8 @@ namespace GUI_Group4_ECommerce.Services
             vnpay.AddRequestData("vnp_TmnCode", _config["VnPay:TmnCode"]);
             //vnpay.AddRequestData("vnp_Amount", (model.Amount * 100).ToString());
             var amountVnp = (long)Math.Round(model.Amount * 100);
+            Console.WriteLine(">>>> model.Amount = " + model.Amount);
+            Console.WriteLine(">>>> vnp_Amount = " + amountVnp);
             vnpay.AddRequestData("vnp_Amount", amountVnp.ToString(System.Globalization.CultureInfo.InvariantCulture));
             vnpay.AddRequestData("vnp_CreateDate", model.CreatedDate.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", _config["VnPay:CurrCode"]);

@@ -1,0 +1,68 @@
+﻿@model DAL_Group4_E_Commerce.Models.Order
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Order Details";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
+    double grandTotal = Model.OrderDetails.Sum(d => d.UnitPrice * (1 - d.Discount) * d.Quantity);
+}
+
+<h2 class="mb-4">Order Details - ID: @Model.OrderId</h2>
+
+<div class="mb-3">
+    <p><strong>Customer:</strong> @Model.CustomerName</p>
+    <p><strong>Address:</strong> @Model.Address</p>
+    <p><strong>Phone:</strong> @Model.Phone</p>
+    <p><strong>Status:</strong> @Model.Status?.StatusName</p>
+    <p><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+    <p><strong>Order Date:</strong> @Model.OrderDate?.ToString("dd/MM/yyyy")</p>
+</div>
+
+<h4>Items</h4>
+<table class="table table-bordered align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Product</th>
+            <th>Image</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Discount</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderDetails)
+        {
+            var discountedPrice = item.UnitPrice * (1 - item.Discount);
+            var total = discountedPrice * item.Quantity;
+            <tr>
+                <td>@item.Product.ProductName</td>
+                <td>
+                    <img src="@item.Product.Image"
+                         alt="@item.Product.ProductName"
+                         class="img-thumbnail product-img"
+                         onerror="this.onerror=null;this.src='/images/default-product.png';" />
+                </td>
+                <td>@item.UnitPrice.ToString("N0", vi) VNĐ</td>
+                <td>@item.Quantity</td>
+                <td>@(item.Discount * 100) %</td>
+                <td>@total.ToString("N0", vi) VNĐ</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="5" class="text-end fw-bold">Total:</td>
+            <td class="fw-bold">@grandTotal.ToString("N0", vi) VNĐ</td>
+        </tr>
+    </tfoot>
+</table>
+
+<style>
+    .product-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+</style>

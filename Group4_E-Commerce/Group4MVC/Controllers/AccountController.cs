@@ -5,6 +5,7 @@ using System.Security.Claims;
 using ViewModels;
 using BUS_Group4_E_Commerce;
 using DAL_Group4_E_Commerce.Models;
+using GUI_Group4_ECommerce.Helpers;
 
 namespace Controllers
 {
@@ -347,12 +348,16 @@ namespace Controllers
 
         private async Task SignInUserAsync(string userId, string fullName, string email, string userType, bool rememberMe)
         {
+            Console.WriteLine("Signing in: " + userId); // hoặc Debug.WriteLine
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId),
                 new Claim(ClaimTypes.Name, fullName),
                 new Claim(ClaimTypes.Email, email),
-                new Claim("UserType", userType)
+                new Claim("UserType", userType),
+                new Claim(MySetting.CLAIM_CUSTOMERID, userId)
+
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

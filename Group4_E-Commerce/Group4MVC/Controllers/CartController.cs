@@ -93,22 +93,21 @@ namespace GUI_Group4_ECommerce.Controllers
         [HttpPost]
         public IActionResult Checkout(CheckoutVM model, string payment = "COD")
         {
-            if (payment == "Pay with VNPay")
+            Console.WriteLine("Checkout called!");
+
+            var idClaim = HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == MySetting.CLAIM_CUSTOMERID);
+            foreach (var c in HttpContext.User.Claims)
             {
-                var vnPayModel = new VnPaymentRequestModel
-                {
-                    Amount = CartItems.Sum(p => p.Total),
-                    CreatedDate = DateTime.Now,
-                    Description = $"{model.FullName} {model.Phone}",
-                    FullName = model.FullName,
-                    OrderId = new Random().Next(1000, 10000)
-                };
-                return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, vnPayModel));
+                Console.WriteLine($"Claim: {c.Type} = {c.Value}");
             }
 
-            var idClaim = HttpContext.User.FindFirst(MySetting.CLAIM_CUSTOMERID);
             if (idClaim == null) return Unauthorized();
             string customerId = idClaim.Value;
+            foreach (var claim in HttpContext.User.Claims)
+            {
+                Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
+            }
+
 
             var customer = db.Customers.SingleOrDefault(c => c.CustomerId == customerId);
             if (customer == null) return NotFound();
@@ -135,7 +134,7 @@ namespace GUI_Group4_ECommerce.Controllers
                 OrderDate = DateTime.Now,
                 PaymentMethod = payment,
                 ShippingMethod = "GRAB",
-                StatusId = 0,
+                StatusId = (payment == "Pay with VNPay") ? 2 : 1,
                 Note = model.Note
             };
 
@@ -143,7 +142,7 @@ namespace GUI_Group4_ECommerce.Controllers
             try
             {
                 db.Add(order);
-                db.SaveChanges();
+                db.SaveChanges(); // cần thiết để lấy được order.OrderId
 
                 var details = CartItems.Select(i => new OrderDetail
                 {
@@ -157,6 +156,21 @@ namespace GUI_Group4_ECommerce.Controllers
                 db.SaveChanges();
                 db.Database.CommitTransaction();
 
+
+                if (payment == "Pay with VNPay")
+                {
+                    var vnPayModel = new VnPaymentRequestModel
+                    {
+                        Amount = CartItems.Sum(p => p.Total),
+                        CreatedDate = DateTime.Now,
+                        Description = $"{model.FullName} {model.Phone}",
+                        FullName = model.FullName,
+                        OrderId = order.OrderId  // CHUẨN XÁC!
+                    };
+
+                    return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, vnPayModel));
+                }
+
                 HttpContext.Session.Set(MySetting.CART_KEY, new List<CartItem>());
                 return View("Success");
             }
@@ -167,6 +181,7 @@ namespace GUI_Group4_ECommerce.Controllers
                 return View(CartItems);
             }
         }
+
 
         [Authorize]
         public IActionResult PaymentFail()
