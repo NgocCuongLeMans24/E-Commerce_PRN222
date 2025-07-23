@@ -26,27 +26,16 @@ namespace BUS_Group4_E_Commerce
         {
             return _orderRepo.GetOrderWithDetails(orderId, customerId);
         }
-    }
 
-namespace BUS_Group4_E_Commerce
-{
-	public class OrderService : IOrderService
-	{
-		private readonly IOrderRepository _orderRepository;
-
-		public OrderService(IOrderRepository orderRepository)
-		{
-			_orderRepository = orderRepository;
-		}
 
 		public async Task<IEnumerable<Order>> GetAllOrdersAsync()
 		{
-			return await _orderRepository.GetAllAsync();
+			return await _orderRepo.GetAllAsync();
 		}
 
 		public async Task<IEnumerable<Order>> SearchOrdersAsync(string? searchTerm)
 		{
-			return await _orderRepository.SearchAsync(searchTerm);
+			return await _orderRepo.SearchAsync(searchTerm);
 		}
 	}
 }

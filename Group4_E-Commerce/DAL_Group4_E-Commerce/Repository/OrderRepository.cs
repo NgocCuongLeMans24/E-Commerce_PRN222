@@ -34,18 +34,6 @@ namespace DAL_Group4_E_Commerce.Repository
                 .Include(o => o.Status)
                 .FirstOrDefault(o => o.OrderId == orderId && o.CustomerId == customerId);
         }
-    }
-
-namespace DAL_Group4_E_Commerce.Repository
-{
-	public class OrderRepository : IOrderRepository
-	{
-		private readonly EcommercePrn222Context _context;
-
-		public OrderRepository(EcommercePrn222Context context)
-		{
-			_context = context;
-		}
 
 		/* -------------------- LẤY TẤT CẢ -------------------- */
 		public async Task<IEnumerable<Order>> GetAllAsync()
