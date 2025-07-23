@@ -128,9 +128,9 @@ namespace GUI_Group4_ECommerce.Controllers
             var order = new Order
             {
                 CustomerId = customerId,
-                CustomerName = model.FullName ?? customer.FullName,
-                Address = model.Address ?? customer.Address,
-                Phone = model.Phone ?? customer.Phone,
+                CustomerName = model.FullName,
+                Phone = model.Phone,
+                Address = model.Address,
                 OrderDate = DateTime.Now,
                 PaymentMethod = payment,
                 ShippingMethod = "GRAB",

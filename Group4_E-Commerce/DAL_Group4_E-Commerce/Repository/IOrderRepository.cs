@@ -11,9 +11,6 @@ namespace DAL_Group4_E_Commerce.Repository
     {
         IEnumerable<Order> GetOrdersByCustomerId(string customerId);
         Order? GetOrderWithDetails(int orderId, string customerId);
-    }
-	public interface IOrderRepository
-	{
 		Task<IEnumerable<Order>> GetAllAsync();
 
 		Task<IEnumerable<Order>> SearchAsync(string? searchTerm);
