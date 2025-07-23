@@ -12,7 +12,8 @@ namespace ViewModels
 		public string SearchQuery { get; set; } = string.Empty;
 
 		// Sắp xếp
-		public string SortOrder { get; set; } = "asc";
+		public string SortBy { get; set; } = "date";  // or "orderId", "customer"
+		public string SortOrder { get; set; } = "asc"; // "asc" or "desc"
 
 		// Phân trang
 		public int CurrentPage { get; set; } = 1;

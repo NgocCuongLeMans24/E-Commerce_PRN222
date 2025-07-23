@@ -277,6 +277,11 @@
     font-size: 0.875rem;
 }
 
+.mt-4 {
+    margin-top: 2rem;
+}
+
+
 @media (max-width: 768px) {
     .dashboard-container {
         padding: 1rem;

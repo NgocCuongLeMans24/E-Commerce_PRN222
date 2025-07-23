@@ -1,10 +1,5 @@
 ﻿using DAL_Group4_E_Commerce.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAL_Group4_E_Commerce.Repository
 {
@@ -17,11 +12,17 @@ namespace DAL_Group4_E_Commerce.Repository
 			_context = context;
 		}
 
+		/* -------------------- LẤY TẤT CẢ -------------------- */
 		public async Task<IEnumerable<Order>> GetAllAsync()
 		{
-			return await _context.Orders.ToListAsync();
+			return await _context.Orders
+				.Include(o => o.Customer)
+				.Include(o => o.Employee)
+				.Include(o => o.Status)
+				.ToListAsync();
 		}
 
+		/* -------------------- SEARCH -------------------- */
 		public async Task<IEnumerable<Order>> SearchAsync(string? searchTerm)
 		{
 			var query = _context.Orders
@@ -32,18 +33,18 @@ namespace DAL_Group4_E_Commerce.Repository
 
 			if (!string.IsNullOrWhiteSpace(searchTerm))
 			{
+				var kw = searchTerm.ToLower();   // 👉 không phân biệt hoa‑thường
 				query = query.Where(o =>
-					o.OrderId.ToString().Contains(searchTerm) ||
-					o.CustomerId.Contains(searchTerm) ||
-					o.CustomerName.Contains(searchTerm) ||
-					o.Phone.Contains(searchTerm) ||
-					o.Status.StatusName.Contains(searchTerm)
+					o.OrderId.ToString().Contains(kw) ||
+					(!string.IsNullOrEmpty(o.CustomerId) && o.CustomerId.ToLower().Contains(kw)) ||
+					(o.Customer != null && !string.IsNullOrEmpty(o.Customer.FullName) && o.Customer.FullName.ToLower().Contains(kw)) ||
+					(o.Customer != null && !string.IsNullOrEmpty(o.Customer.Email) && o.Customer.Email.ToLower().Contains(kw)) ||
+					(!string.IsNullOrEmpty(o.Phone) && o.Phone.ToLower().Contains(kw)) ||
+					(o.Status != null && !string.IsNullOrEmpty(o.Status.StatusName) && o.Status.StatusName.ToLower().Contains(kw))
 				);
 			}
 
 			return await query.ToListAsync();
 		}
-
 	}
-
 }
