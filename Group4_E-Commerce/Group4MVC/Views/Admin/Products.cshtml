@@ -1,0 +1,144 @@
+﻿@model ViewModels.ProductManagementViewModel
+
+@{
+    ViewData["Title"] = "Product Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    Func<string, string> sortIcon = sortBy =>
+        Model.SortBy.Equals(sortBy, StringComparison.OrdinalIgnoreCase)
+            ? (Model.SortOrder == "asc" ? "↑" : "↓")
+            : "";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">🛒 Product Management</h2>
+        <span class="text-muted">Total: <strong>@Model.TotalCount</strong> products</span>
+    </div>
+
+    <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary mb-3">
+        🔙 Back to Dashboard
+    </a>
+
+    <!-- 🔍 FILTER FORM -->
+    <form method="get" class="row g-3 mb-4 bg-light p-3 rounded shadow-sm">
+        <div class="col-md-4">
+            <input name="Keyword" value="@Model.Keyword" class="form-control" placeholder="🔍 Search by name or ID" />
+        </div>
+        <div class="col-md-3">
+            <select name="CategoryId" class="form-select">
+                <option value="">📂 All Categories</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.CategoryId" selected="@(Model.CategoryId == category.CategoryId ? "selected" : null)">
+                        @category.CategoryName
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="SupplierId" class="form-select">
+                <option value="">🏢 All Suppliers</option>
+                @foreach (var supplier in Model.Suppliers)
+                {
+                    <option value="@supplier.SupplierId" selected="@(Model.SupplierId == supplier.SupplierId ? "selected" : null)">
+                        @supplier.CompanyName
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">🔎 Filter</button>
+        </div>
+    </form>
+
+    <!-- 📋 PRODUCT TABLE -->
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>
+                        <a asp-action="Products" asp-route-SortBy="ProductId" asp-route-SortOrder="@(Model.SortOrder == "asc" ? "desc" : "asc")"
+                           asp-route-CategoryId="@Model.CategoryId" asp-route-SupplierId="@Model.SupplierId"
+                           asp-route-Keyword="@Model.Keyword" asp-route-PageNumber="@Model.PageNumber">
+                            ID @sortIcon("ProductId")
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="Products" asp-route-SortBy="ProductName" asp-route-SortOrder="@(Model.SortOrder == "asc" ? "desc" : "asc")"
+                           asp-route-CategoryId="@Model.CategoryId" asp-route-SupplierId="@Model.SupplierId"
+                           asp-route-Keyword="@Model.Keyword" asp-route-PageNumber="@Model.PageNumber">
+                            Name @sortIcon("ProductName")
+                        </a>
+                    </th>
+                    <th>Alias</th>
+                    <th>Category</th>
+                    <th>Supplier</th>
+                    <th>Unit</th>
+                    <th>
+                        <a asp-action="Products" asp-route-SortBy="UnitPrice" asp-route-SortOrder="@(Model.SortOrder == "asc" ? "desc" : "asc")"
+                           asp-route-CategoryId="@Model.CategoryId" asp-route-SupplierId="@Model.SupplierId"
+                           asp-route-Keyword="@Model.Keyword" asp-route-PageNumber="@Model.PageNumber">
+                            Price @sortIcon("UnitPrice")
+                        </a>
+                    </th>
+                    <th>Discount</th>
+                    <th>Views</th>
+                    <th>Manufacture</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                @if (!Model.Products.Any())
+                {
+                    <tr>
+                        <td colspan="10" class="text-muted">No products found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var p in Model.Products)
+                    {
+                        <tr>
+                            <td>@p.ProductId</td>
+                            <td>@p.ProductName</td>
+                            <td>@p.Alias</td>
+                            <td>@(p.Category?.CategoryName ?? "N/A")</td>
+                            <td>@(p.Supplier?.CompanyName ?? "N/A")</td>
+                            <td>@p.UnitDescription</td>
+                            <td>@(p.UnitPrice.HasValue? p.UnitPrice.Value.ToString("C") : "N/A")</td>
+                            <td>@(p.Discount.HasValue ? $"{p.Discount:P0}" : "0%")</td>
+                            <td>@(p.Views ?? 0)</td>
+                            <td>@(p.ManufactureDate?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 📄 PAGINATION -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @{
+                var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+            }
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Products"
+                       asp-route-PageNumber="@i"
+                       asp-route-PageSize="@Model.PageSize"
+                       asp-route-CategoryId="@Model.CategoryId"
+                       asp-route-SupplierId="@Model.SupplierId"
+                       asp-route-Keyword="@Model.Keyword"
+                       asp-route-SortBy="@Model.SortBy"
+                       asp-route-SortOrder="@Model.SortOrder">
+                        @i
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>

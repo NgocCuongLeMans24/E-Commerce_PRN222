@@ -1,0 +1,89 @@
+﻿@model ViewModels.EditCustomerViewModel
+
+@section Styles {
+        <link rel="stylesheet" href="~/css/customer-management/edit.css" />
+}
+
+<div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content edit-customer-modal-wrapper">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerModalLabel">
+                    ✏️ Edit Customer
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editCustomerForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="CustomerID" />
+
+                    <!-- Basic Information -->
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label asp-for="FullName" class="form-label">Full Name *</label>
+                            <input asp-for="FullName" type="text" class="form-input" placeholder="Enter customer's full name">
+                            <span asp-validation-for="FullName" class="validation-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Email" class="form-label">Email Address *</label>
+                            <input asp-for="Email" type="email" autocomplete="email" class="form-input" placeholder="customer@email.com">
+                            <span asp-validation-for="Email" class="validation-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label asp-for="Phone" class="form-label">Phone Number</label>
+                            <input asp-for="Phone" type="tel" class="form-input" placeholder="(555) 123-4567">
+                            <span asp-validation-for="Phone" class="validation-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Address" class="form-label">Address</label>
+                            <input asp-for="Address" type="text" class="form-input" placeholder="123 Main Street, City, State">
+                            <span asp-validation-for="Address" class="validation-error"></span>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <div class="radio-group">
+                                <label class="radio-wrapper">
+                                    <input asp-for="Gender" type="radio" value="false" class="form-radio">
+                                    <span>👨 Male</span>
+                                </label>
+                                <label class="radio-wrapper">
+                                    <input asp-for="Gender" type="radio" value="true" class="form-radio">
+                                    <span>👩 Female</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="BirthDate" class="form-label">Birth Date</label>
+                            <input asp-for="BirthDate" type="date" class="form-input">
+                            <span asp-validation-for="BirthDate" class="validation-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input asp-for="IsActive" type="checkbox" class="form-checkbox">
+                            <label asp-for="IsActive" class="form-label">Account is Active</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-primary" onclick="submitEditCustomerForm()">💾 Update Customer</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -64,12 +64,14 @@ namespace BUS_Group4_E_Commerce
 
                     // Compare hashes
                     return storedHash.SequenceEqual(computedHash);
-                }
-            }
+
+				}
+			}
             catch
             {
                 return false;
             }
         }
-    }
+
+	}
 }

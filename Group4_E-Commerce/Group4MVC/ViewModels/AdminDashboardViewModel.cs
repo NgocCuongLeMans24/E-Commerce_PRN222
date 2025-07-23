@@ -12,5 +12,7 @@ namespace ViewModels
         public int TotalProducts { get; set; }
         public List<Customer> RecentCustomers { get; set; } = new List<Customer>();
         public List<Employee> RecentEmployees { get; set; } = new List<Employee>();
-    }
+        public List<Order> RecentOrders { get; set; } = new List<Order>();
+        public List<Product> RecentProducts { get; set; } = new List<Product>();
+	}
 }
