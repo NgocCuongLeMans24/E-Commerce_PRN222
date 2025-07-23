@@ -703,40 +703,121 @@ namespace Controllers
 
 		#region Order Management
 
-        public async Task<IActionResult> Orders(OrderManagementViewModel model)
-        {
-            var orders = await _orderService.GetAllOrdersAsync();
-            // Apply search filter
-            if (!string.IsNullOrEmpty(model.SearchQuery))
-            {
-                orders = orders.Where(o =>
-					o.OrderId.ToString().Contains(model.SearchQuery, StringComparison.OrdinalIgnoreCase) ||
-                    o.Customer.FullName.Contains(model.SearchQuery, StringComparison.OrdinalIgnoreCase) ||
-                    o.Customer.Email.Contains(model.SearchQuery , StringComparison.OrdinalIgnoreCase));
-            }
-            // Apply sorting
-            orders = model.SortOrder.ToLower() switch
-            {
-                "customer" => model.SortOrder == "desc"
-                    ? orders.OrderByDescending(o => o.Customer.FullName)
-                    : orders.OrderBy(o => o.Customer.FullName),
-                "date" => model.SortOrder == "desc"
-                    ? orders.OrderByDescending(o => o.OrderDate)
-                    : orders.OrderBy(o => o.OrderDate),
-                _ => model.SortOrder == "desc"
-                    ? orders.OrderByDescending(o => o.OrderId)
-                    : orders.OrderBy(o => o.OrderId)
-            };
-            model.TotalItems = orders.Count();
-            // Apply pagination
-            var pagedOrders = orders
-                .Skip((model.CurrentPage - 1) * model.PageSize)
-                .Take(model.PageSize)
-                .ToList();
-            model.Orders = pagedOrders;
+		public async Task<IActionResult> Orders(OrderManagementViewModel model)
+		{
+			// 1. Lấy dữ liệu gốc
+			var orders = await _orderService.GetAllOrdersAsync();
 
-            return View(model);
+			// 2. Search
+			if (!string.IsNullOrWhiteSpace(model.SearchQuery))
+			{
+				var kw = model.SearchQuery.ToLower();
+				orders = orders.Where(o =>
+					o.OrderId.ToString().Contains(kw) ||
+					(o.Customer != null && (
+						(!string.IsNullOrEmpty(o.Customer.FullName) && o.Customer.FullName.ToLower().Contains(kw)) ||
+						(!string.IsNullOrEmpty(o.Customer.Email) && o.Customer.Email.ToLower().Contains(kw))
+					)) ||
+					(!string.IsNullOrEmpty(o.Phone) && o.Phone.ToLower().Contains(kw))
+				);
+			}
+
+			// 3. Sort
+			orders = model.SortBy?.ToLower() switch
+			{
+				"customer" => model.SortOrder == "desc"
+					? orders.OrderByDescending(o => o.Customer.FullName)
+					: orders.OrderBy(o => o.Customer.FullName),
+
+				"freight" => model.SortOrder == "desc"
+					? orders.OrderByDescending(o => o.Freight)
+					: orders.OrderBy(o => o.Freight),
+
+				"date" => model.SortOrder == "desc"
+					? orders.OrderByDescending(o => o.OrderDate)
+					: orders.OrderBy(o => o.OrderDate),
+
+				_ => model.SortOrder == "desc"
+					? orders.OrderByDescending(o => o.OrderId)
+					: orders.OrderBy(o => o.OrderId)
+			};
+
+			// 4. Paging + đổ ra ViewModel
+			model.TotalItems = orders.Count();
+
+			model.Orders = orders
+				.Skip((model.CurrentPage - 1) * model.PageSize)
+				.Take(model.PageSize)
+				.ToList();
+
+			return View(model);
 		}
+
+
+
+		#endregion
+
+		#region Product Management
+
+
+		public IActionResult Products(ProductManagementViewModel model)
+		{
+			var products = _productService.GetAll();
+
+			// ✅ Filter theo Category
+			if (model.CategoryId.HasValue)
+			{
+				products = products.Where(p => p.CategoryId == model.CategoryId.Value).ToList();
+			}
+
+			// ✅ Filter theo Supplier
+			if (!string.IsNullOrEmpty(model.SupplierId))
+			{
+				products = products.Where(p => p.SupplierId == model.SupplierId).ToList();
+			}
+
+			// 🔍 Keyword search
+			if (!string.IsNullOrEmpty(model.Keyword))
+			{
+				var keyword = model.Keyword.ToLower();
+				products = products.Where(p =>
+					p.ProductId.ToString().Contains(keyword) ||
+					(!string.IsNullOrEmpty(p.ProductName) && p.ProductName.ToLower().Contains(keyword))
+				).ToList();
+			}
+
+			// 🔃 Sort
+			products = (model.SortBy?.ToLower()) switch
+			{
+				"name" => model.SortOrder == "desc"
+					? products.OrderByDescending(p => p.ProductName).ToList()
+					: products.OrderBy(p => p.ProductName).ToList(),
+
+				"price" => model.SortOrder == "desc"
+					? products.OrderByDescending(p => p.UnitPrice).ToList()
+					: products.OrderBy(p => p.UnitPrice).ToList(),
+
+				_ => model.SortOrder == "desc"
+					? products.OrderByDescending(p => p.ProductId).ToList()
+					: products.OrderBy(p => p.ProductId).ToList()
+			};
+
+			// 📄 Pagination
+			model.TotalCount = products.Count();
+			model.Products = products
+				.Skip((model.PageNumber - 1) * model.PageSize)
+				.Take(model.PageSize)
+				.ToList();
+
+			// 📋 Load categories and suppliers for dropdown
+			model.Categories = _productService.GetCategories();
+			model.Suppliers = _productService.GetSuppliers();
+
+			return View(model);
+		}
+
+
+
 
 		#endregion
 	}
