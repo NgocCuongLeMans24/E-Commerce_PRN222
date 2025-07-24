@@ -17,7 +17,6 @@ namespace BUS_Group4_E_Commerce
 		Task<IEnumerable<Order>> SearchOrdersAsync(string? searchTerm);
 
         List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId);
-
-
     }
+
 }
