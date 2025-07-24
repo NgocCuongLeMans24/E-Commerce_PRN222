@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 
 namespace DAL_Group4_E_Commerce.Repository
 {
-	public class OrderRepository : IOrderRepository
-	{
-		private readonly EcommercePrn222Context _context;
 
-		public OrderRepository(EcommercePrn222Context context)
-		{
-			_context = context;
-		}
+    public class OrderRepository : IOrderRepository
+    {
+        private readonly EcommercePrn222Context _context;
+
+        public OrderRepository(EcommercePrn222Context context)
+        {   
+            _context = context;
+        }
 
 		/* -------------------- LẤY TẤT CẢ -------------------- */
 		public async Task<IEnumerable<Order>> GetAllAsync()
@@ -74,4 +75,17 @@ namespace DAL_Group4_E_Commerce.Repository
 					.FirstOrDefault(o => o.OrderId == orderId && o.CustomerId == customerId);
 			}
 		}
+
+        public List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId)
+        {
+            return _context.OrderDetails
+                .Include(od => od.Order)
+                .Include(od => od.Product)
+                .Where(od => od.Product.SupplierId == supplierId)
+                .OrderByDescending(od => od.Order.OrderDate)
+                .ToList();
+        }
+
+    }
+
 }

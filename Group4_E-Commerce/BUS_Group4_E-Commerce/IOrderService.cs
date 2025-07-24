@@ -11,8 +11,12 @@ namespace BUS_Group4_E_Commerce
     {
         IEnumerable<Order> GetOrdersByCustomerId(string customerId);
         Order? GetOrderWithDetails(int orderId, string customerId);
+
 		Task<IEnumerable<Order>> GetAllOrdersAsync();
 
 		Task<IEnumerable<Order>> SearchOrdersAsync(string? searchTerm);
-	}
+
+        List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId);
+    }
+
 }

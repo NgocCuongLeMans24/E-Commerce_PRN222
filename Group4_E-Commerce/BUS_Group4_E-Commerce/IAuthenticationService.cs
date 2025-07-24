@@ -11,6 +11,8 @@ namespace BUS_Group4_E_Commerce
     {
         Task<Customer?> AuthenticateCustomerAsync(string email, string password);
         Task<Employee?> AuthenticateEmployeeAsync(string email, string password);
+
+        Task<Supplier?> AuthenticateSupplierAsync(string email, string password);
         Task<bool> RegisterCustomerAsync(Customer customer);
     }
 }
