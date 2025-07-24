@@ -10,7 +10,7 @@ namespace ViewModels
 		public List<Category> Categories { get; set; } = new();
 		public List<Supplier> Suppliers { get; set; } = new();
 
-        public List<OrderDetail> OrderDetails { get; set; }
+        public List<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
         public int? CategoryId { get; set; }
 		public string? SupplierId { get; set; }

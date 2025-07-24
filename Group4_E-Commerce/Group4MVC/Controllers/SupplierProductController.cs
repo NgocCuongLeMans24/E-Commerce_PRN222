@@ -12,12 +12,14 @@ namespace Controllers
     {
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
+        
 
 
         public SupplierProductController(IProductService productService, IOrderService orderService)
         {
             _productService = productService;
             _orderService = orderService;
+            
         }
 
 
@@ -63,7 +65,8 @@ namespace Controllers
         {
             var model = new ProductManagementViewModel
             {
-                Categories = _productService.GetCategories()
+                Categories = _productService.GetCategories(),
+                OrderDetails = new List<OrderDetail>()
             };
 
             return View(model);
@@ -71,27 +74,75 @@ namespace Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(ProductManagementViewModel model)
+        public async Task<IActionResult> Create(ProductManagementViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var supplierId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var product = new Product
-                {
-                    ProductName = model.ProductName,
-                    Description = model.Description,
-                    UnitPrice = (double?)model.Price,
-                    SupplierId = supplierId,
-                    CategoryId = (int)model.CategoryId
-                };
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                TempData["Error"] = string.Join("; ", errors);
+                model.Categories = _productService.GetCategories();
+                model.OrderDetails = new List<OrderDetail>();
+                return View(model);
+            }
 
+            var supplierId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(supplierId))
+            {
+                TempData["Error"] = "SupplierId is null. Please login as Supplier.";
+                model.Categories = _productService.GetCategories();
+                model.OrderDetails = new List<OrderDetail>();
+                return View(model);
+            }
+
+            // Lấy các trường bổ sung từ form
+            var alias = Request.Form["Alias"].ToString();
+            var unitDescription = Request.Form["UnitDescription"].ToString();
+            var discountStr = Request.Form["Discount"].ToString();
+            var viewsStr = Request.Form["Views"].ToString();
+            var manufactureDateStr = Request.Form["ManufactureDate"].ToString();
+            var imageUrl = Request.Form["ImageUrl"].ToString();
+            double? discount = null;
+            int? views = null;
+            DateTime? manufactureDate = null;
+            if (double.TryParse(discountStr, out var d)) discount = d;
+            if (int.TryParse(viewsStr, out var v)) views = v;
+            if (DateTime.TryParse(manufactureDateStr, out var md)) manufactureDate = md;
+
+            // Chỉ lưu URL ảnh, không upload cloudinary
+            string imagePublicId = null;
+            if (!string.IsNullOrWhiteSpace(imageUrl))
+            {
+                imagePublicId = imageUrl.Trim();
+            }
+
+            var product = new Product
+            {
+                ProductName = model.ProductName,
+                Alias = string.IsNullOrWhiteSpace(alias) ? null : alias,
+                CategoryId = (int)model.CategoryId,
+                UnitDescription = string.IsNullOrWhiteSpace(unitDescription) ? null : unitDescription,
+                UnitPrice = (double?)model.Price,
+                Image = imagePublicId,
+                ManufactureDate = manufactureDate,
+                Discount = discount,
+                Views = views,
+                Description = model.Description,
+                SupplierId = supplierId
+            };
+
+            try
+            {
                 _productService.Add(product);
                 TempData["Success"] = "Product created.";
                 return RedirectToAction("MyProducts");
             }
-
-            model.Categories = _productService.GetCategories();
-            return View(model);
+            catch (Exception ex)
+            {
+                TempData["Error"] = "DB Error: " + ex.Message;
+                model.Categories = _productService.GetCategories();
+                model.OrderDetails = new List<OrderDetail>();
+                return View(model);
+            }
         }
 
 
@@ -105,23 +156,24 @@ namespace Controllers
             if (product == null || product.SupplierId != supplierId)
                 return Forbid();
 
+            var orderDetails = _orderService.GetOrderDetailsBySupplierId(supplierId);
             var model = new ProductManagementViewModel
             {
                 ProductId = product.ProductId,
                 ProductName = product.ProductName,
                 Description = product.Description,
                 Price = (decimal)(product.UnitPrice ?? 0),
-                CategoryId = product.CategoryId
-
+                CategoryId = product.CategoryId,
+                Categories = _productService.GetCategories(),
+                OrderDetails = orderDetails,
             };
-
 
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(ProductManagementViewModel model)
+        public async Task<IActionResult> Edit(ProductManagementViewModel model)
         {
             var product = _productService.GetById(model.ProductId);
             var supplierId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -129,24 +181,73 @@ namespace Controllers
             if (product == null || product.SupplierId != supplierId)
                 return Forbid();
 
-            // cập nhật thông tin
+            if (!ModelState.IsValid)
+            {
+                model.Categories = _productService.GetCategories();
+                model.OrderDetails = _orderService.GetOrderDetailsBySupplierId(supplierId);
+                ViewBag.Product = product;
+                return View(model);
+            }
+
+            // Lấy các trường bổ sung từ form
+            var alias = Request.Form["Alias"].ToString();
+            var unitDescription = Request.Form["UnitDescription"].ToString();
+            var discountStr = Request.Form["Discount"].ToString();
+            var viewsStr = Request.Form["Views"].ToString();
+            var manufactureDateStr = Request.Form["ManufactureDate"].ToString();
+            var imageUrl = Request.Form["ImageUrl"].ToString();
+            double? discount = null;
+            int? views = null;
+            DateTime? manufactureDate = null;
+            if (double.TryParse(discountStr, out var d)) discount = d;
+            if (int.TryParse(viewsStr, out var v)) views = v;
+            if (DateTime.TryParse(manufactureDateStr, out var md)) manufactureDate = md;
+
+            // Chỉ lưu URL ảnh, không upload cloudinary
+            if (!string.IsNullOrWhiteSpace(imageUrl))
+            {
+                product.Image = imageUrl.Trim();
+            }
+
+            // Cập nhật các trường
             product.ProductName = model.ProductName;
-            //...
+            product.Description = model.Description;
+            product.UnitPrice = (double?)model.Price;
+            product.CategoryId = (int)model.CategoryId;
+            product.Alias = string.IsNullOrWhiteSpace(alias) ? null : alias;
+            product.UnitDescription = string.IsNullOrWhiteSpace(unitDescription) ? null : unitDescription;
+            product.Discount = discount;
+            product.Views = views;
+            product.ManufactureDate = manufactureDate;
+            // Image đã cập nhật ở trên nếu có nhập URL
+
             _productService.Update(product);
 
             return RedirectToAction("MyProducts");
         }
 
         [HttpPost]
+        
         public IActionResult Delete(int id)
         {
             var product = _productService.GetById(id);
             var supplierId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (product == null || product.SupplierId != supplierId)
-                return Forbid();
+            {
+                TempData["Error"] = "Delete failed: Product not found or you do not have permission.";
+                return RedirectToAction("MyProducts");
+            }
 
-            _productService.Delete(id);
+            try
+            {
+                _productService.Delete(id);
+                TempData["Success"] = "Product deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Delete failed: " + ex.Message;
+            }
             return RedirectToAction("MyProducts");
         }
 

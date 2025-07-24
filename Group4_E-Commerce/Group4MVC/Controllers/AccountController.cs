@@ -203,6 +203,16 @@ namespace Controllers
                         userName = employee.FullName;
                     }
                 }
+                else if (model.UserType == "Supplier")
+                {
+                    var supplierService = HttpContext.RequestServices.GetRequiredService<ISupplierService>();
+                    var supplier = await supplierService.GetSupplierByEmailAsync(model.Email);
+                    if (supplier != null)
+                    {
+                        userExists = true;
+                        userName = supplier.CompanyName;
+                    }
+                }
 
                 if (userExists)
                 {
