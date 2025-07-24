@@ -35,26 +35,16 @@
                 <div class="col-md-3">
                     <label for="sortBy" class="form-label">Sort By</label>
                     <select class="form-select" id="sortBy" name="sortBy">
-                        @{
-                                    var selectedPageName = Model.SortBy == "PageName" ? "selected" : "";
-                                    var selectedURL = Model.SortBy == "URL" ? "selected" : "";
-                                    var selectedPageId = Model.SortBy == "PageId" ? "selected" : "";
-                         }
-
-                                <option value="PageName" selected="@selectedPageName">Page Name</option>
-                                <option value="URL" selected="@selectedURL">URL</option>
-                                <option value="PageId" selected="@selectedPageId">Page ID</option>
+                        <option value="PageName" selected="@(Model.SortBy == "PageName")">Page Name</option>
+                        <option value="URL" selected="@(Model.SortBy == "URL")">URL</option>
+                        <option value="PageId" selected="@(Model.SortBy == "PageId")">Page ID</option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label for="sortOrder" class="form-label">Order</label>
                     <select class="form-select" id="sortOrder" name="sortOrder">
-                        @{
-                                    var selectedAsc = Model.SortOrder == "asc" ? "selected" : "";
-                                    var selectedDesc = Model.SortOrder == "desc" ? "selected" : "";
-                                }
-                                <option value="asc" selected="@selectedAsc">Ascending</option>
-                                <option value="desc" selected="@selectedDesc">Descending</option>
+                        <option value="asc" selected="@(Model.SortOrder == "asc")">Ascending</option>
+                        <option value="desc" selected="@(Model.SortOrder == "desc")">Descending</option>
                     </select>
                 </div>
                 <div class="col-md-2">

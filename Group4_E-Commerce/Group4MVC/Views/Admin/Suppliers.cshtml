@@ -22,31 +22,6 @@
         </div>
     </div>
 
-    @* <!-- Filters and Search --> *@
-    @* <div class="filter-section"> *@
-    @*     <form method="get" class="search-form"> *@
-    @*         <div class="search-group"> *@
-    @*             <input type="text" name="searchTerm" value="@Model.SearchTerm" placeholder="Search suppliers..." class="form-control"> *@
-    @*             <button type="submit" class="btn btn-outline-primary"> *@
-    @*                 <i class="fas fa-search"></i> *@
-    @*             </button> *@
-    @*         </div> *@
-    @*         <div class="filter-group"> *@
-    @*             <select name="sortBy" class="form-select"> *@
-    @*                 <option value="CompanyName" selected="@(Model.SortBy == "CompanyName")">Company Name</option> *@
-    @*                 <option value="Email" selected="@(Model.SortBy == "Email")">Email</option> *@
-    @*                 <option value="ContactName" selected="@(Model.SortBy == "ContactName")">Contact Name</option> *@
-    @*                 <option value="ProductCount" selected="@(Model.SortBy == "ProductCount")">Product Count</option> *@
-    @*             </select> *@
-    @*             <select name="sortOrder" class="form-select"> *@
-    @*                 <option value="asc" selected="@(Model.SortOrder == "asc")">Ascending</option> *@
-    @*                 <option value="desc" selected="@(Model.SortOrder == "desc")">Descending</option> *@
-    @*             </select> *@
-    @*         </div> *@
-    @*         <input type="hidden" name="pageNumber" value="1" /> *@
-    @*     </form> *@
-    @* </div> *@
-
     <!-- Filters -->
     <div class="filters-card">
         <form method="get" asp-action="Suppliers">

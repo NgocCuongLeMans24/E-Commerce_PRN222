@@ -15,7 +15,7 @@
     <!-- Custom Admin CSS -->
     <link href="~/css/admin/admin-sidebar.css" rel="stylesheet" />
     <link href="~/css/admin/admin.css" rel="stylesheet" />
-    <link href="~/css/admin/admin-permissions.css" rel="stylesheet" />
+    @* <link href="~/css/admin/admin-permissions.css" rel="stylesheet" /> *@
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -28,38 +28,9 @@
         <div class="admin-main">
             <!-- Header -->
             <header class="admin-header">
-                <div class="header-left">
-                    <button class="sidebar-toggle d-lg-none" id="mobileSidebarToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Dashboard</a></li>
-                            @if (ViewData["BreadcrumbItems"] != null)
-                            {
-                                @foreach (var item in (List<dynamic>)ViewData["BreadcrumbItems"])
-                                {
-                                    if (item.IsActive)
-                                    {
-                                        <li class="breadcrumb-item active" aria-current="page">@item.Text</li>
-                                    }
-                                    else
-                                    {
-                                        <li class="breadcrumb-item"><a href="@item.Url">@item.Text</a></li>
-                                    }
-                                }
-                            }
-                        </ol>
-                    </nav>
-                </div>
-                <div class="header-right">
-                    <div class="header-notifications">
-                        <button class="notification-btn">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge">3</span>
-                        </button>
-                    </div>
-                </div>
+                <a class="navbar-brand" href="/">
+                    <i class="fas fa-bolt text-danger"></i> Group4 E-Shop
+                </a>
             </header>
 
             <!-- Content -->

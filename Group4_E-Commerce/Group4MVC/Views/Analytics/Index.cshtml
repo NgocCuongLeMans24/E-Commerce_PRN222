@@ -22,7 +22,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Sales</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.TotalSales.ToString("N2")</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">VND @(Model.TotalSales.ToString("N2"))</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -38,7 +38,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Monthly Sales</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.MonthlySales.ToString("N2")</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">VND @Model.MonthlySales.ToString("N2")</div>
                             @if (Model.MonthlyGrowthPercentage != 0)
                             {
                                 <div class="text-xs @(Model.MonthlyGrowthPercentage > 0 ? "text-success" : "text-danger")">
@@ -76,7 +76,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Avg Order Value</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.AverageOrderValue.ToString("N2")</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">VND @Model.AverageOrderValue.ToString("N2")</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-chart-line fa-2x text-gray-300"></i>
@@ -121,7 +121,7 @@
                             </div>
                             <div class="d-flex justify-content-between mt-1">
                                 <small class="text-muted">@product.TotalQuantity sold</small>
-                                <small class="font-weight-bold">$@product.TotalRevenue.ToString("N2")</small>
+                                <small class="font-weight-bold">VND @product.TotalRevenue.ToString("N2")</small>
                             </div>
                         </div>
                     }
@@ -141,13 +141,13 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="text-center">
-                                <div class="h4 font-weight-bold text-primary">$@Model.WeeklySales.ToString("N0")</div>
+                                <div class="h4 font-weight-bold text-primary">VND @Model.WeeklySales.ToString("N0")</div>
                                 <div class="text-muted">This Week</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="text-center">
-                                <div class="h4 font-weight-bold text-success">$@Model.DailySales.ToString("N0")</div>
+                                <div class="h4 font-weight-bold text-success">VND @Model.DailySales.ToString("N0")</div>
                                 <div class="text-muted">Today</div>
                             </div>
                         </div>
@@ -165,9 +165,9 @@
                     <a href="@Url.Action("Sales", "Analytics")" class="btn btn-primary btn-block mb-2">
                         <i class="fas fa-chart-bar"></i> Detailed Sales Report
                     </a>
-                    <button class="btn btn-outline-secondary btn-block" onclick="exportData()">
-                        <i class="fas fa-download"></i> Export Data
-                    </button>
+                    @* <button class="btn btn-outline-secondary btn-block" onclick="exportData()"> *@
+                    @*     <i class="fas fa-download"></i> Export Data *@
+                    @* </button> *@
                 </div>
             </div>
         </div>
@@ -219,7 +219,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                                    return 'VND' + value.toLocaleString();
                                 }
                             }
                         }
@@ -228,7 +228,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return 'Sales: $' + context.parsed.y.toLocaleString();
+                                    return 'Sales: VND' + context.parsed.y.toLocaleString();
                                 }
                             }
                         }

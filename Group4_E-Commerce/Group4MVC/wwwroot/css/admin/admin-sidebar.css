@@ -172,6 +172,9 @@
     }
 
 .sidebar-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     border-top: 1px solid var(--sidebar-border);
     padding: 1rem;
 }

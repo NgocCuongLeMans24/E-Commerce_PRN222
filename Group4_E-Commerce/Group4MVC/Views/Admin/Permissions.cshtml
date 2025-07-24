@@ -4,6 +4,10 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+@section Styles {
+    <link href="~/css/admin/admin-permissions.css" rel="stylesheet" />
+}
+
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -28,8 +32,7 @@
                         <option value="">All Pages</option>
                         @foreach (var page in Model.WebPages)
                         {
-                            var selected = Model.PageFilter == page.PageId ? "selected" : "";
-                            <option value="@(page.PageId)" selected="@selected">
+                            <option value="@(page.PageId)" selected="@(Model.PageFilter == page.PageId)">
                                 @(page.PageName) (@(page.Url))
                             </option>
                         }
