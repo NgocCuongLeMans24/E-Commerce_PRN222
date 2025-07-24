@@ -19,7 +19,6 @@ namespace BUS_Group4_E_Commerce
         Task UpdateOrderAsync(Order order);
 
         List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId);
-
-
     }
+
 }

@@ -48,20 +48,20 @@
                     </a>
                 </th>
                 <th>Required</th>
-                <th>Shipped</th>
+                
                 <th>Shipping</th>
                 <th>
                     <a asp-action="Orders"
                        asp-route-searchQuery="@Model.SearchQuery"
-                       asp-route-sortBy="Freight"
+                       asp-route-sortBy="TotalAmount"
                        asp-route-sortOrder="@(Model.SortOrder == "asc" ? "desc" : "asc")"
                        asp-route-pageNumber="1">
-                        Freight @(Model.SortOrder == "Freight" ? (Model.SortOrder == "asc" ? "⬆️" : "⬇️") : "")
+                        TotalAmount @(Model.SortOrder == "TotalAmount" ? (Model.SortOrder == "asc" ? "⬆️" : "⬇️") : "")
                     </a>
                 </th>
                 <th>Payment</th>
                 <th>Status</th>
-                <th>Assigned Employee</th>
+               
                 <th>Phone</th>
             </tr>
         </thead>
@@ -77,9 +77,14 @@
                             <small class="text-muted">@order.CustomerId</small>
                         </td>
                         <td>@order.RequiredDate?.ToString("dd/MM/yyyy")</td>
-                        <td>@order.ShippedDate?.ToString("dd/MM/yyyy")</td>
                         <td>@order.ShippingMethod</td>
-                        <td>@order.Freight?.ToString("C")</td>
+                        <td>
+                            @{
+                                var total = order.OrderDetails.Sum(d => d.UnitPrice * d.Quantity);
+                            }
+                            @($"{total:N0} VND")
+                        </td>
+
                         <td>@order.PaymentMethod</td>
                         <td>
                             <span class="badge bg-info text-dark">
@@ -95,7 +100,6 @@
                                 </form>
                             }
                         </td>
-                        <td>@(order.Employee?.FullName ?? "N/A")</td>
                         <td>@(order.Phone ?? "N/A")</td>
                     </tr>
                 }
