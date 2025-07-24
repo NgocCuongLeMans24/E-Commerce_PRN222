@@ -11,12 +11,14 @@ namespace DAL_Group4_E_Commerce.Repository
     {
         IEnumerable<Order> GetOrdersByCustomerId(string customerId);
         Order? GetOrderWithDetails(int orderId, string customerId);
+
 		Task<IEnumerable<Order>> GetAllAsync();
 
 		Task<IEnumerable<Order>> SearchAsync(string? searchTerm);
         Task<Order?> GetByIdAsync(int id);
         Task<Order> UpdateAsync(Order order);
         List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId);
+
 
     }
 }

@@ -27,16 +27,15 @@ namespace BUS_Group4_E_Commerce
             return _orderRepo.GetOrderWithDetails(orderId, customerId);
         }
 
+		    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+		    {
+			  return await _orderRepo.GetAllAsync();
+		    }
 
-		public async Task<IEnumerable<Order>> GetAllOrdersAsync()
-		{
-			return await _orderRepo.GetAllAsync();
-		}
-
-		public async Task<IEnumerable<Order>> SearchOrdersAsync(string? searchTerm)
-		{
-			return await _orderRepo.SearchAsync(searchTerm);
-		}
+		    public async Task<IEnumerable<Order>> SearchOrdersAsync(string? searchTerm)
+		    {
+			  return await _orderRepo.SearchAsync(searchTerm);
+		    } 
 
         public async Task<Order?> GetOrderByIdAsync(int id)
         {
@@ -52,6 +51,6 @@ namespace BUS_Group4_E_Commerce
         {
             return _orderRepo.GetOrderDetailsBySupplierId(supplierId);
         }
-
     }
 }
+

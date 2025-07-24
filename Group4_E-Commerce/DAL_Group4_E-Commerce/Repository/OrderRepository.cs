@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace DAL_Group4_E_Commerce.Repository
 {
+
     public class OrderRepository : IOrderRepository
     {
         private readonly EcommercePrn222Context _context;
@@ -17,24 +18,6 @@ namespace DAL_Group4_E_Commerce.Repository
             _context = context;
         }
 
-        public IEnumerable<Order> GetOrdersByCustomerId(string customerId)
-        {
-            return _context.Orders
-                .Include(o => o.Status)
-                .Where(o => o.CustomerId == customerId)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
-        }
-
-        public Order? GetOrderWithDetails(int orderId, string customerId)
-        {
-            return _context.Orders
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .Include(o => o.Status)
-                .FirstOrDefault(o => o.OrderId == orderId && o.CustomerId == customerId);
-        }
-
 		/* -------------------- LẤY TẤT CẢ -------------------- */
 		public async Task<IEnumerable<Order>> GetAllAsync()
 		{
@@ -42,6 +25,8 @@ namespace DAL_Group4_E_Commerce.Repository
 				.Include(o => o.Customer)
 				.Include(o => o.Employee)
 				.Include(o => o.Status)
+				.Include(o => o.OrderDetails)
+				.ThenInclude(od => od.Product)
 				.ToListAsync();
 		}
 
@@ -52,6 +37,8 @@ namespace DAL_Group4_E_Commerce.Repository
 				.Include(o => o.Customer)
 				.Include(o => o.Employee)
 				.Include(o => o.Status)
+				.Include(o => o.OrderDetails)
+				.ThenInclude(od => od.Product)
 				.AsQueryable();
 
 			if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -81,6 +68,23 @@ namespace DAL_Group4_E_Commerce.Repository
             await _context.SaveChangesAsync();
             return order;
         }
+			public IEnumerable<Order> GetOrdersByCustomerId(string customerId)
+			{
+				return _context.Orders
+					.Include(o => o.Status)
+					.Where(o => o.CustomerId == customerId)
+					.OrderByDescending(o => o.OrderDate)
+					.ToList();
+			}
+
+			public Order? GetOrderWithDetails(int orderId, string customerId)
+			{
+				return _context.Orders
+					.Include(o => o.OrderDetails)
+						.ThenInclude(od => od.Product)
+					.Include(o => o.Status)
+					.FirstOrDefault(o => o.OrderId == orderId && o.CustomerId == customerId);
+			}
 
         public List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId)
         {
@@ -93,4 +97,5 @@ namespace DAL_Group4_E_Commerce.Repository
         }
 
     }
+
 }
