@@ -11,15 +11,18 @@ namespace BUS_Group4_E_Commerce
     {
         private readonly ICustomerService _customerService;
         private readonly IEmployeeService _employeeService;
+        private readonly ISupplierService _supplierService;
         private readonly IPasswordHashingService _passwordHashingService;
 
         public AuthenticationService(
             ICustomerService customerService,
             IEmployeeService employeeService,
+            ISupplierService supplierService,
             IPasswordHashingService passwordHashingService)
         {
             _customerService = customerService;
             _employeeService = employeeService;
+            _supplierService = supplierService;
             _passwordHashingService = passwordHashingService;
         }
 
@@ -56,6 +59,17 @@ namespace BUS_Group4_E_Commerce
         public async Task<bool> RegisterCustomerAsync(Customer customer)
         {
             return await _customerService.RegisterCustomerAsync(customer);
+        }
+
+        public async Task<Supplier?> AuthenticateSupplierAsync(string email, string password)
+        {
+            var supplier = await _supplierService.GetSupplierByEmailAsync(email);
+            if (supplier != null)
+            {
+                // Implement password check logic (you may need to add Password field in DB or hardcode temporarily)
+                return supplier;
+            }
+            return null;
         }
     }
 }

@@ -1,0 +1,27 @@
+﻿@model IEnumerable<DAL_Group4_E_Commerce.Models.OrderDetail>
+
+<h2>Order History</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Order Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var od in Model)
+        {
+            <tr>
+                <td>@od.OrderId</td>
+                <td>@od.Product.ProductName</td>
+                <td>@od.Quantity</td>
+                <td>@(od.Quantity * od.UnitPrice)</td>
+                @od.Order.OrderDate?.ToString("dd/MM/yyyy")
+
+            </tr>
+        }
+    </tbody>
+</table>
