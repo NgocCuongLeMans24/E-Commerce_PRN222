@@ -35,16 +35,16 @@
                 <div class="col-md-3">
                     <label for="sortBy" class="form-label">Sort By</label>
                     <select class="form-select" id="sortBy" name="sortBy">
-                        @* <option value="CategoryName" @(Model.SortBy == "CategoryName" ? "selected" : "")>Category Name</option> *@
-                        @* <option value="ProductCount" @(Model.SortBy == "ProductCount" ? "selected" : "")>Product Count</option> *@
-                        @* <option value="CategoryId" @(Model.SortBy == "CategoryId" ? "selected" : "")>Category ID</option> *@
+                        <option value="CategoryName" selected="@(Model.SortBy == "CategoryName")">Category Name</option> 
+                        <option value="ProductCount" selected="@(Model.SortBy == "ProductCount")">Product Count</option>
+                        <option value="CategoryId" selected="@(Model.SortBy == "CategoryId")">Category ID</option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label for="sortOrder" class="form-label">Order</label>
                     <select class="form-select" id="sortOrder" name="sortOrder">
-                        @* <option value="asc" @(Model.SortOrder == "asc" ? "selected" : "")>Ascending</option> *@
-                        @* <option value="desc" @(Model.SortOrder == "desc" ? "selected" : "")>Descending</option> *@
+                        <option value="asc" selected="@(Model.SortOrder == "asc")">Ascending</option>
+                        <option value="desc" selected="@(Model.SortOrder == "desc")">Descending</option>
                     </select>
                 </div>
                 <div class="col-md-2">

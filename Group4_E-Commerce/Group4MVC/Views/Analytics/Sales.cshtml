@@ -11,9 +11,9 @@
             <a href="@Url.Action("Index", "Analytics")" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
-            <button class="btn btn-primary" onclick="exportReport()">
-                <i class="fas fa-download"></i> Export Report
-            </button>
+            @* <button class="btn btn-primary" onclick="exportReport()"> *@
+            @*     <i class="fas fa-download"></i> Export Report *@
+            @* </button> *@
         </div>
     </div>
 
@@ -25,7 +25,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Year to Date Sales</div>
-                            <div class="h4 mb-0 font-weight-bold text-gray-800">$@Model.YearToDateSales.ToString("N2")</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800">VND @Model.YearToDateSales.ToString("N2")</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-chart-line fa-2x text-gray-300"></i>
@@ -106,7 +106,7 @@
                                 <td>#@order.OrderId</td>
                                 <td>@order.CustomerName</td>
                                 <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
-                                <td>$@order.TotalAmount.ToString("N2")</td>
+                                <td>VND @order.TotalAmount.ToString("N2")</td>
                                 <td>
                                     <span class="badge badge-success">@order.Status</span>
                                 </td>
@@ -139,9 +139,9 @@
                         {
                             <tr>
                                 <td>@category.CategoryName</td>
-                                <td>$@category.TotalSales.ToString("N2")</td>
+                                <td>VND @category.TotalSales.ToString("N2")</td>
                                 <td>@category.TotalQuantity</td>
-                                <td>$@((category.TotalQuantity > 0 ? category.TotalSales / category.TotalQuantity : 0).ToString("N2"))</td>
+                                <td>VND @((category.TotalQuantity > 0 ? category.TotalSales / category.TotalQuantity : 0).ToString("N2"))</td>
                             </tr>
                         }
                     </tbody>
@@ -183,7 +183,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                                    return 'VND' + value.toLocaleString();
                                 }
                             }
                         }
@@ -192,7 +192,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return 'Sales: $' + context.parsed.y.toLocaleString();
+                                    return 'Sales: VND' + context.parsed.y.toLocaleString();
                                 }
                             }
                         }
@@ -231,7 +231,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return context.label + ': $' + context.parsed.toLocaleString();
+                                    return context.label + ': VND' + context.parsed.toLocaleString();
                                 }
                             }
                         }

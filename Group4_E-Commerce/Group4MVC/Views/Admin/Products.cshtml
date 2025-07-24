@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Product Management";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
     Func<string, string> sortIcon = sortBy =>
         Model.SortBy.Equals(sortBy, StringComparison.OrdinalIgnoreCase)

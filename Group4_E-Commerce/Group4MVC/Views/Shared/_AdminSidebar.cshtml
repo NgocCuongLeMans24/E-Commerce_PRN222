@@ -17,15 +17,6 @@
     </div>
 
     <div class="sidebar-content">
-        <div class="sidebar-user">
-            <div class="user-avatar">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="user-info">
-                <div class="user-name">@User.FindFirst(ClaimTypes.Name)?.Value</div>
-            </div>
-        </div>
-
         <nav class="sidebar-nav">
             <ul class="nav-list">
                 <!-- Dashboard -->
@@ -108,8 +99,8 @@
 
                 <!-- Products -->
                 <li class="nav-item">
-                    <a href="@Url.Action("Index", "Product")"
-                       class="nav-link @(currentController == "Product" ? "active" : "")">
+                    <a href="@Url.Action("Products", "Admin")"
+                       class="nav-link @(currentController == "Admin" && currentAction == "Products" ? "active" : "")">
                         <i class="nav-icon fas fa-box"></i>
                         <span class="nav-text">Products</span>
                     </a>
@@ -137,19 +128,19 @@
                         <span class="nav-text">Reports</span>
                     </a>
                 </li>
-
-                <!-- Settings -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-cog"></i>
-                        <span class="nav-text">Settings</span>
-                    </a>
-                </li>
             </ul>
         </nav>
     </div>
 
     <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <div class="user-name">@User.FindFirst(ClaimTypes.Name)?.Value</div>
+            </div>
+        </div>
         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
             <button type="submit" class="btn logout-btn border-0 bg-transparent p-0">
                 <i class="fas fa-sign-out-alt me-2"></i>

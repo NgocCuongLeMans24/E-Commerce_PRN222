@@ -853,11 +853,11 @@ namespace Controllers
                     var result = await _supplierService.CreateSupplierAsync(supplier);
                     if (result)
                     {
-                        TempData["SuccessMessage"] = "Supplier created successfully!";
+                        //TempData["SuccessMessage"] = "Supplier created successfully!";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Failed to create supplier. ID or email might already exist.";
+                        //TempData["ErrorMessage"] = "Failed to create supplier. ID or email might already exist.";
                     }
                 }
                 else
@@ -900,11 +900,11 @@ namespace Controllers
                     var result = await _supplierService.UpdateSupplierAsync(supplier);
                     if (result)
                     {
-                        TempData["SuccessMessage"] = "Supplier updated successfully!";
+                        //TempData["SuccessMessage"] = "Supplier updated successfully!";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Failed to update supplier. Email might already exist.";
+                        //TempData["ErrorMessage"] = "Failed to update supplier. Email might already exist.";
                     }
                 }
                 else
@@ -930,11 +930,11 @@ namespace Controllers
                 var result = await _supplierService.DeleteSupplierAsync(supplierId);
                 if (result)
                 {
-                    TempData["SuccessMessage"] = "Supplier deleted successfully!";
+                    //TempData["SuccessMessage"] = "Supplier deleted successfully!";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Failed to delete supplier. It might have products assigned.";
+                    //TempData["ErrorMessage"] = "Failed to delete supplier. It might have products assigned.";
                 }
             }
             catch (Exception ex)
@@ -1029,7 +1029,7 @@ namespace Controllers
 
         #region Product Management
 
-
+        [RequirePermission("view", "/admin/products")]
         public IActionResult Products(ProductManagementViewModel model)
 		{
 			var products = _productService.GetAll();
