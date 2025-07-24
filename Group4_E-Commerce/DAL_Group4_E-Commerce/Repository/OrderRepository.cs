@@ -8,36 +8,6 @@ using System.Threading.Tasks;
 
 namespace DAL_Group4_E_Commerce.Repository
 {
-    public class OrderRepository : IOrderRepository
-    {
-        private readonly EcommercePrn222Context _context;
-
-        public OrderRepository(EcommercePrn222Context context)
-        {   
-            _context = context;
-        }
-
-        public IEnumerable<Order> GetOrdersByCustomerId(string customerId)
-        {
-            return _context.Orders
-                .Include(o => o.Status)
-                .Where(o => o.CustomerId == customerId)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
-        }
-
-        public Order? GetOrderWithDetails(int orderId, string customerId)
-        {
-            return _context.Orders
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .Include(o => o.Status)
-                .FirstOrDefault(o => o.OrderId == orderId && o.CustomerId == customerId);
-        }
-    }
-
-namespace DAL_Group4_E_Commerce.Repository
-{
 	public class OrderRepository : IOrderRepository
 	{
 		private readonly EcommercePrn222Context _context;
@@ -54,6 +24,8 @@ namespace DAL_Group4_E_Commerce.Repository
 				.Include(o => o.Customer)
 				.Include(o => o.Employee)
 				.Include(o => o.Status)
+				.Include(o => o.OrderDetails)
+				.ThenInclude(od => od.Product)
 				.ToListAsync();
 		}
 
@@ -64,6 +36,8 @@ namespace DAL_Group4_E_Commerce.Repository
 				.Include(o => o.Customer)
 				.Include(o => o.Employee)
 				.Include(o => o.Status)
+				.Include(o => o.OrderDetails)
+				.ThenInclude(od => od.Product)
 				.AsQueryable();
 
 			if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -81,5 +55,23 @@ namespace DAL_Group4_E_Commerce.Repository
 
 			return await query.ToListAsync();
 		}
-	}
+
+			public IEnumerable<Order> GetOrdersByCustomerId(string customerId)
+			{
+				return _context.Orders
+					.Include(o => o.Status)
+					.Where(o => o.CustomerId == customerId)
+					.OrderByDescending(o => o.OrderDate)
+					.ToList();
+			}
+
+			public Order? GetOrderWithDetails(int orderId, string customerId)
+			{
+				return _context.Orders
+					.Include(o => o.OrderDetails)
+						.ThenInclude(od => od.Product)
+					.Include(o => o.Status)
+					.FirstOrDefault(o => o.OrderId == orderId && o.CustomerId == customerId);
+			}
+		}
 }
