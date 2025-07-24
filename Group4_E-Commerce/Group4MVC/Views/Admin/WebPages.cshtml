@@ -1,0 +1,320 @@
+﻿@model ViewModels.WebPageManagementViewModel
+@{
+    ViewData["Title"] = "Web Page Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/css/admin/admin-webpages.css" rel="stylesheet" />
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Web Page Management</h2>
+            <p class="text-muted">Manage web pages and their URLs for permission control</p>
+        </div>
+        @if (ViewBag.CanAddWebPage == true)
+        {
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWebPageModal">
+                <i class="fas fa-plus me-2"></i>Add Web Page
+            </button>
+        }
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                           value="@Model.SearchTerm" placeholder="Search by page name or URL...">
+                </div>
+                <div class="col-md-3">
+                    <label for="sortBy" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortBy" name="sortBy">
+                        @{
+                                    var selectedPageName = Model.SortBy == "PageName" ? "selected" : "";
+                                    var selectedURL = Model.SortBy == "URL" ? "selected" : "";
+                                    var selectedPageId = Model.SortBy == "PageId" ? "selected" : "";
+                         }
+
+                                <option value="PageName" selected="@selectedPageName">Page Name</option>
+                                <option value="URL" selected="@selectedURL">URL</option>
+                                <option value="PageId" selected="@selectedPageId">Page ID</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortOrder" class="form-label">Order</label>
+                    <select class="form-select" id="sortOrder" name="sortOrder">
+                        @{
+                                    var selectedAsc = Model.SortOrder == "asc" ? "selected" : "";
+                                    var selectedDesc = Model.SortOrder == "desc" ? "selected" : "";
+                                }
+                                <option value="asc" selected="@selectedAsc">Ascending</option>
+                                <option value="desc" selected="@selectedDesc">Descending</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <a href="@Url.Action("WebPages")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Web Pages Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Web Pages (@Model.TotalCount)</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.WebPages.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Page Name</th>
+                                <th>URL</th>
+                                <th>Permissions Assigned</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var page in Model.WebPages)
+                            {
+                                var permissionCount = Model.Permissions.Count(p => p.PageId == page.PageId);
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-light text-dark">@(page.PageId)</span>
+                                    </td>
+                                    <td>
+                                        <strong>@(page.PageName)</strong>
+                                    </td>
+                                    <td>
+                                        <code class="text-primary">@(page.Url)</code>
+                                    </td>
+                                    <td>
+                                        @if (permissionCount > 0)
+                                        {
+                                            <span class="badge bg-info">@permissionCount employees</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No permissions</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            @if (ViewBag.CanEditWebPage == true)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        onclick="editWebPage(@(page.PageId), '@(page.PageName)', '@(page.Url)')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            }
+                                            @if (ViewBag.CanDeleteWebPage == true)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="deleteWebPage(@(page.PageId), '@(page.PageName)', @permissionCount)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("WebPages", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm, sortBy = Model.SortBy, sortOrder = Model.SortOrder })">Previous</a>
+                            </li>
+                            
+                            @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("WebPages", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm, sortBy = Model.SortBy, sortOrder = Model.SortOrder })">@i</a>
+                                </li>
+                            }
+                            
+                            <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("WebPages", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm, sortBy = Model.SortBy, sortOrder = Model.SortOrder })">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No web pages found</h5>
+                    <p class="text-muted">Try adjusting your search criteria or add new web pages.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Create Web Page Modal -->
+<div class="modal fade" id="createWebPageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Web Page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="@Url.Action("CreateWebPage")">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="PageName" class="form-label">Page Name</label>
+                        <input type="text" class="form-control" id="PageName" name="PageName" required>
+                        <div class="form-text">Display name for the page</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Url" class="form-label">URL</label>
+                        <input type="text" class="form-control" id="Url" name="Url" required placeholder="/admin/example">
+                        <div class="form-text">Unique URL path for the page (must start with /)</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Page</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Web Page Modal -->
+<div class="modal fade" id="editWebPageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Web Page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="@Url.Action("UpdateWebPage")">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" id="editPageId" name="PageId">
+                    <div class="mb-3">
+                        <label for="editPageName" class="form-label">Page Name</label>
+                        <input type="text" class="form-control" id="editPageName" name="PageName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editUrl" class="form-label">URL</label>
+                        <input type="text" class="form-control" id="editUrl" name="Url" required>
+                        <div class="form-text">Unique URL path for the page (must start with /)</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Page</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteWebPageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Web Page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this web page?</p>
+                <div class="alert alert-warning">
+                    <strong>Page:</strong> <span id="deletePageName"></span><br>
+                    <strong>URL:</strong> <code id="deletePageUrl"></code>
+                </div>
+                <div id="deleteWarning" class="alert alert-danger" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    This page has permissions assigned to employees. You cannot delete it.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="@Url.Action("DeleteWebPage")" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deletePageId" name="pageId">
+                    <button type="submit" id="confirmDeleteBtn" class="btn btn-danger">Delete Page</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editWebPage(pageId, pageName, url) {
+            document.getElementById('editPageId').value = pageId;
+            document.getElementById('editPageName').value = pageName;
+            document.getElementById('editUrl').value = url;
+            new bootstrap.Modal(document.getElementById('editWebPageModal')).show();
+        }
+
+        function deleteWebPage(pageId, pageName, permissionCount) {
+            document.getElementById('deletePageId').value = pageId;
+            document.getElementById('deletePageName').textContent = pageName;
+            document.getElementById('deletePageUrl').textContent = document.querySelector(`tr:has(button[onclick*="${pageId}"]) code`).textContent;
+
+            const warningDiv = document.getElementById('deleteWarning');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+            if (permissionCount > 0) {
+                warningDiv.style.display = 'block';
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = 'Cannot Delete';
+            } else {
+                warningDiv.style.display = 'none';
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Delete Page';
+            }
+
+            new bootstrap.Modal(document.getElementById('deleteWebPageModal')).show();
+        }
+
+        // Auto-format URL input
+        document.getElementById('Url').addEventListener('input', function(e) {
+            let value = e.target.value;
+            if (value && !value.startsWith('/')) {
+                e.target.value = '/' + value;
+            }
+        });
+
+        document.getElementById('editUrl').addEventListener('input', function(e) {
+            let value = e.target.value;
+            if (value && !value.startsWith('/')) {
+                e.target.value = '/' + value;
+            }
+        });
+    </script>
+}

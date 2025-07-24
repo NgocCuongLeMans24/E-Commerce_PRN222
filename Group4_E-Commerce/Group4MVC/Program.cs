@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 ﻿using DAL_Group4_E_Commerce.Models;
 using GUI_Group4_ECommerce.Services;
 using Microsoft.EntityFrameworkCore;
+using Group4MVC.Services;
 
 namespace Group4MVC
 {
@@ -46,16 +47,13 @@ namespace Group4MVC
             // Register Repositories
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-
-            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
-
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
 
-
-			// Register Services
-			builder.Services.AddScoped<IPasswordHashingService, PasswordHashingService>();
+            // Register Services
+            builder.Services.AddScoped<IPasswordHashingService, PasswordHashingService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
             builder.Services.AddScoped<IProductService, ProductService>();
@@ -64,15 +62,16 @@ namespace Group4MVC
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             builder.Services.AddSingleton<IOtpService, OtpService>();
-            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IPermissionService, PermissionService>();
 
             builder.Services.AddScoped<ISupplierService, SupplierService>();
-
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("CustomerOnly", policy => policy.RequireClaim("UserType", "Customer"));
                 options.AddPolicy("EmployeeOnly", policy => policy.RequireClaim("UserType", "Employee"));
+                options.AddPolicy("SupplierOnly", policy => policy.RequireClaim("UserType", "Supplier"));
             });
 
             builder.Services.AddSingleton<IVnPayService,VnPayService>();

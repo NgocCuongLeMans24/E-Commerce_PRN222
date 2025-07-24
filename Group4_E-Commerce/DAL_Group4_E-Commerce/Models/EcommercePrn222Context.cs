@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace DAL_Group4_E_Commerce.Models;
 
@@ -16,13 +15,9 @@ public partial class EcommercePrn222Context : DbContext
     {
     }
 
-    public virtual DbSet<Assignment> Assignments { get; set; }
-
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Customer> Customers { get; set; }
-
-    public virtual DbSet<Department> Departments { get; set; }
 
     public virtual DbSet<Employee> Employees { get; set; }
 
@@ -48,45 +43,10 @@ public partial class EcommercePrn222Context : DbContext
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
-    public virtual DbSet<VOrderDetail> VOrderDetails { get; set; }
-
     public virtual DbSet<WebPage> WebPages { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-        if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseSqlServer(config.GetConnectionString("DB"));
-
-        }
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Assignment>(entity =>
-        {
-            entity.Property(e => e.AssignmentId).HasColumnName("AssignmentID");
-            entity.Property(e => e.AssignedDate).HasColumnType("datetime");
-            entity.Property(e => e.DepartmentId)
-                .HasMaxLength(7)
-                .IsUnicode(false)
-                .HasColumnName("DepartmentID");
-            entity.Property(e => e.EmployeeId)
-                .HasMaxLength(50)
-                .HasColumnName("EmployeeID");
-
-            entity.HasOne(d => d.Department).WithMany(p => p.Assignments)
-                .HasForeignKey(d => d.DepartmentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Assignments_Departments");
-
-            entity.HasOne(d => d.Employee).WithMany(p => p.Assignments)
-                .HasForeignKey(d => d.EmployeeId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Assignments_Employees");
-        });
-
         modelBuilder.Entity<Category>(entity =>
         {
             entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
@@ -111,21 +71,12 @@ public partial class EcommercePrn222Context : DbContext
             entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Phone).HasMaxLength(24);
             entity.Property(e => e.Photo)
-                .HasMaxLength(50)
+                .HasMaxLength(255)
                 .HasDefaultValue("Photo.gif");
             entity.Property(e => e.RandomKey)
-                .HasMaxLength(255)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Role).HasDefaultValue(0);
-        });
-
-        modelBuilder.Entity<Department>(entity =>
-        {
-            entity.Property(e => e.DepartmentId)
-                .HasMaxLength(7)
-                .IsUnicode(false)
-                .HasColumnName("DepartmentID");
-            entity.Property(e => e.DepartmentName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Employee>(entity =>
@@ -212,7 +163,9 @@ public partial class EcommercePrn222Context : DbContext
             entity.Property(e => e.PaymentMethod)
                 .HasMaxLength(50)
                 .HasDefaultValue("Cash");
-            entity.Property(e => e.Phone).HasMaxLength(24);
+            entity.Property(e => e.Phone)
+                .HasMaxLength(24)
+                .IsFixedLength();
             entity.Property(e => e.RequiredDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -260,15 +213,15 @@ public partial class EcommercePrn222Context : DbContext
         modelBuilder.Entity<Permission>(entity =>
         {
             entity.Property(e => e.PermissionId).HasColumnName("PermissionID");
-            entity.Property(e => e.DepartmentId)
-                .HasMaxLength(7)
-                .IsUnicode(false)
-                .HasColumnName("DepartmentID");
+            entity.Property(e => e.EmployeeId)
+                .HasMaxLength(50)
+                .HasColumnName("EmployeeID");
             entity.Property(e => e.PageId).HasColumnName("PageID");
 
-            entity.HasOne(d => d.Department).WithMany(p => p.Permissions)
-                .HasForeignKey(d => d.DepartmentId)
-                .HasConstraintName("FK_Permissions_Departments");
+            entity.HasOne(d => d.Employee).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Permissions_Employees");
 
             entity.HasOne(d => d.Page).WithMany(p => p.Permissions)
                 .HasForeignKey(d => d.PageId)
@@ -361,20 +314,8 @@ public partial class EcommercePrn222Context : DbContext
             entity.Property(e => e.CompanyName).HasMaxLength(50);
             entity.Property(e => e.ContactName).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(50);
-            entity.Property(e => e.Logo).HasMaxLength(50);
+            entity.Property(e => e.Logo).HasMaxLength(255);
             entity.Property(e => e.Phone).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<VOrderDetail>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToView("vOrderDetails");
-
-            entity.Property(e => e.OrderDetailId).HasColumnName("OrderDetailID");
-            entity.Property(e => e.OrderId).HasColumnName("OrderID");
-            entity.Property(e => e.ProductId).HasColumnName("ProductID");
-            entity.Property(e => e.ProductName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<WebPage>(entity =>
