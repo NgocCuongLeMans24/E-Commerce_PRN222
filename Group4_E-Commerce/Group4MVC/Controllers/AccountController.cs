@@ -13,11 +13,13 @@ namespace Controllers
     {
         private readonly BUS_Group4_E_Commerce.IAuthenticationService _authService;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(BUS_Group4_E_Commerce.IAuthenticationService authService, ICloudinaryService cloudinaryService)
+        public AccountController(BUS_Group4_E_Commerce.IAuthenticationService authService, ICloudinaryService cloudinaryService, IConfiguration configuration)
         {
             _authService = authService;
             _cloudinaryService = cloudinaryService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -35,12 +37,32 @@ namespace Controllers
 
             if (ModelState.IsValid)
             {
-                if (model.UserType == "Customer")
+                if (model.UserType == "Admin")
+                {
+                    var adminEmail = _configuration["AdminAccount:Email"];
+                    var adminPassword = _configuration["AdminAccount:Password"];
+                    if (model.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase) &&
+                    model.Password == adminPassword)
+                    {
+                        await SignInUserAsync("0", "Admin", model.Email, "Admin", model.RememberMe);
+                        return RedirectToLocal(returnUrl ?? "/Admin");
+                    }
+                }
+                else if (model.UserType == "Customer")
                 {
                     var customer = await _authService.AuthenticateCustomerAsync(model.Email, model.Password);
                     if (customer != null)
                     {
                         await SignInUserAsync(customer.CustomerId, customer.FullName, customer.Email, "Customer", model.RememberMe);
+                        return RedirectToLocal(returnUrl ?? "/");
+                    }
+                }
+                else if (model.UserType == "Supplier")
+                {
+                    var supplier = await _authService.AuthenticateSupplierAsync(model.Email, model.Password);
+                    if (supplier != null)
+                    {
+                        await SignInUserAsync(supplier.SupplierId, supplier.CompanyName, supplier.Email, "Supplier", model.RememberMe);
                         return RedirectToLocal(returnUrl ?? "/");
                     }
                 }

@@ -64,10 +64,12 @@ namespace BUS_Group4_E_Commerce
         public async Task<Supplier?> AuthenticateSupplierAsync(string email, string password)
         {
             var supplier = await _supplierService.GetSupplierByEmailAsync(email);
-            if (supplier != null)
+            if (supplier != null && !string.IsNullOrEmpty(supplier.Password))
             {
-                // Implement password check logic (you may need to add Password field in DB or hardcode temporarily)
-                return supplier;
+                if (_passwordHashingService.VerifyPassword(password, supplier.Password))
+                {
+                    return supplier;
+                }
             }
             return null;
         }

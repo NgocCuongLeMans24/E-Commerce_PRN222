@@ -7,7 +7,7 @@ using ViewModels;
 
 namespace Controllers
 {
-    [Authorize(Roles = "Supplier")]
+    [Authorize(Policy = "SupplierOnly")]
     public class SupplierProductController : Controller
     {
         private readonly IProductService _productService;

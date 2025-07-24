@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Order Management";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container mt-4">
@@ -90,6 +90,15 @@
                             <span class="badge bg-info text-dark">
                                 @(order.Status?.StatusName ?? "Pending")
                             </span>
+                            @if (order.StatusId == 1 || order.StatusId == 2)
+                            {
+                                <form asp-action="ChangeStatus" asp-route-id="@order.OrderId" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary ms-2"
+                                            onclick="return confirm('Are you sure you want to change status?');">
+                                        Change →
+                                    </button>
+                                </form>
+                            }
                         </td>
                         <td>@(order.Phone ?? "N/A")</td>
                     </tr>

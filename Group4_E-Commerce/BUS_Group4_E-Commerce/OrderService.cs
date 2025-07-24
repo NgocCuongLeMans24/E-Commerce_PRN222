@@ -37,6 +37,16 @@ namespace BUS_Group4_E_Commerce
 			  return await _orderRepo.SearchAsync(searchTerm);
 		    } 
 
+        public async Task<Order?> GetOrderByIdAsync(int id)
+        {
+            return await _orderRepo.GetByIdAsync(id);
+        }
+
+        public async Task UpdateOrderAsync(Order order)
+        {
+            await _orderRepo.UpdateAsync(order);
+        }
+
         public List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId)
         {
             return _orderRepo.GetOrderDetailsBySupplierId(supplierId);

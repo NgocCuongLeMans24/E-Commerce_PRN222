@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using GUI_Group4_ECommerce.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using GUI_Group4_ECommerce.Services;
+using System.Diagnostics;
 
 namespace GUI_Group4_ECommerce.Controllers
 {
@@ -195,6 +196,17 @@ namespace GUI_Group4_ECommerce.Controllers
             var response = _vnPayService.PaymentExecute(Request.Query);
             if (response == null || response.VnPayResponseCode != "00")
             {
+                if (int.TryParse(response?.OrderId, out int orderId))
+                {
+                    var order = db.Orders.FirstOrDefault(o => o.OrderId == orderId);
+
+                    if (order != null)
+                    {
+                        order.StatusId = 1;
+                        db.SaveChanges();
+                    }
+                }
+
                 TempData["Message"] = $"VnPay payment error {response?.VnPayResponseCode}";
                 return RedirectToAction(nameof(PaymentFail));
             }

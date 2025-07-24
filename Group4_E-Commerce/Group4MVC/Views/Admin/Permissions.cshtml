@@ -1,0 +1,353 @@
+﻿@model ViewModels.EmployeePermissionViewModel
+@{
+    ViewData["Title"] = "Permission Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/css/admin/admin-permissions.css" rel="stylesheet" />
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Permission Management</h2>
+            <p class="text-muted">Manage employee permissions for different page URLs</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Search Employees</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                           value="@Model.SearchTerm" placeholder="Search by name or email...">
+                </div>
+                <div class="col-md-3">
+                    <label for="pageFilter" class="form-label">Filter by Page Access</label>
+                    <select class="form-select" id="pageFilter" name="pageFilter">
+                        <option value="">All Pages</option>
+                        @foreach (var page in Model.WebPages)
+                        {
+                            <option value="@(page.PageId)" selected="@(Model.PageFilter == page.PageId)">
+                                @(page.PageName) (@(page.Url))
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <a href="@Url.Action("Permissions")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Employees Grid -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Employees (@Model.TotalCount)</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Employees.Any())
+            {
+                <div class="row">
+                    @foreach (var employee in Model.Employees)
+                    {
+                        var employeePermissions = Model.Permissions.Where(p => p.EmployeeId == employee.EmployeeId).ToList();
+                        var accessiblePagesCount = employeePermissions.Count(p => p.CanView);
+                        
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 employee-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="avatar-circle me-3">
+                                            @employee.FullName.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">@employee.FullName</h6>
+                                            <small class="text-muted">@employee.Email</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-muted">Page Access</span>
+                                            <span class="badge bg-primary">@accessiblePagesCount/@Model.WebPages.Count</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: @(Model.WebPages.Count > 0 ? (accessiblePagesCount * 100 / Model.WebPages.Count) : 0)%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="permission-summary mb-3">
+                                        @{
+                                            var canViewCount = employeePermissions.Count(p => p.CanView);
+                                            var canAddCount = employeePermissions.Count(p => p.CanAdd);
+                                            var canEditCount = employeePermissions.Count(p => p.CanEdit);
+                                            var canDeleteCount = employeePermissions.Count(p => p.CanDelete);
+                                        }
+                                        <div class="row text-center">
+                                            <div class="col-3">
+                                                <div class="permission-stat">
+                                                    <div class="stat-number text-success">@canViewCount</div>
+                                                    <div class="stat-label">View</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="permission-stat">
+                                                    <div class="stat-number text-info">@canAddCount</div>
+                                                    <div class="stat-label">Add</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="permission-stat">
+                                                    <div class="stat-number text-warning">@canEditCount</div>
+                                                    <div class="stat-label">Edit</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="permission-stat">
+                                                    <div class="stat-number text-danger">@canDeleteCount</div>
+                                                    <div class="stat-label">Delete</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Show accessible pages -->
+                                    <div class="accessible-pages mb-3">
+                                        <small class="text-muted d-block mb-2">Accessible Pages:</small>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach (var permission in employeePermissions.Where(p => p.CanView))
+                                            {
+                                                var page = Model.WebPages.FirstOrDefault(w => w.PageId == permission.PageId);
+                                                if (page != null)
+                                                {
+                                                    <span class="badge bg-light text-dark" title="@(page.Url)">
+                                                        @(page.PageName)
+                                                    </span>
+                                                }
+                                            }
+                                            @if (!employeePermissions.Any(p => p.CanView))
+                                            {
+                                                <span class="text-muted">No accessible pages</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    @if (ViewBag.CanEditPermissions == true)
+                                    {
+                                        <button type="button" class="btn btn-primary btn-sm w-100" 
+                                                onclick="editPermissions('@employee.EmployeeId', '@employee.FullName')">
+                                            <i class="fas fa-edit me-2"></i>Edit Permissions
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Permissions", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm, pageFilter = Model.PageFilter })">Previous</a>
+                            </li>
+                            
+                            @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Permissions", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm, pageFilter = Model.PageFilter })">@i</a>
+                                </li>
+                            }
+                            
+                            <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Permissions", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm, pageFilter = Model.PageFilter })">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-users text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No employees found</h5>
+                    <p class="text-muted">Try adjusting your search criteria</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit Permissions Modal -->
+<div class="modal fade" id="editPermissionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Permissions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editPermissionsForm" method="post" action="@Url.Action("UpdatePermissions")">
+                <div class="modal-body">
+                    <input type="hidden" id="employeeId" name="EmployeeId" />
+                    <div id="permissionsContainer">
+                        <!-- Permissions will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editPermissions(employeeId, employeeName) {
+            document.getElementById('employeeId').value = employeeId;
+            document.querySelector('#editPermissionsModal .modal-title').textContent = `Edit Permissions - ${employeeName}`;
+            
+            // Load employee permissions
+            fetch(`@Url.Action("GetEmployeePermissions")?employeeId=${employeeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error loading permissions: ' + data.error);
+                        return;
+                    }
+                    
+                    let html = '<div class="table-responsive"><table class="table table-striped">';
+                    html += '<thead><tr><th>Page</th><th>URL</th><th>View</th><th>Add</th><th>Edit</th><th>Delete</th></tr></thead><tbody>';
+                    
+                    @foreach (var page in Model.WebPages)
+                    {
+                        <text>
+                        html += '<tr>';
+                        html += '<td><strong>@(page.PageName)</strong></td>';
+                        html += '<td><code>@(page.Url)</code></td>';
+                        html += '<td><input type="checkbox" class="form-check-input" name="Permissions[@(page.PageId)].CanView" value="true" /></td>';
+                        html += '<td><input type="checkbox" class="form-check-input" name="Permissions[@(page.PageId)].CanAdd" value="true" /></td>';
+                        html += '<td><input type="checkbox" class="form-check-input" name="Permissions[@(page.PageId)].CanEdit" value="true" /></td>';
+                        html += '<td><input type="checkbox" class="form-check-input" name="Permissions[@(page.PageId)].CanDelete" value="true" /></td>';
+                        html += '</tr>';
+                        </text>
+                    }
+                    
+                    html += '</tbody></table></div>';
+                    document.getElementById('permissionsContainer').innerHTML = html;
+                    
+                    // Set current permissions
+                    data.forEach(permission => {
+                        const pageId = permission.pageId;
+                        if (permission.canView) {
+                            const viewCheckbox = document.querySelector(`input[name="Permissions[${pageId}].CanView"]`);
+                            if (viewCheckbox) viewCheckbox.checked = true;
+                        }
+                        if (permission.canAdd) {
+                            const addCheckbox = document.querySelector(`input[name="Permissions[${pageId}].CanAdd"]`);
+                            if (addCheckbox) addCheckbox.checked = true;
+                        }
+                        if (permission.canEdit) {
+                            const editCheckbox = document.querySelector(`input[name="Permissions[${pageId}].CanEdit"]`);
+                            if (editCheckbox) editCheckbox.checked = true;
+                        }
+                        if (permission.canDelete) {
+                            const deleteCheckbox = document.querySelector(`input[name="Permissions[${pageId}].CanDelete"]`);
+                            if (deleteCheckbox) deleteCheckbox.checked = true;
+                        }
+                    });
+                    
+                    new bootstrap.Modal(document.getElementById('editPermissionsModal')).show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading permissions');
+                });
+        }
+    </script>
+}
+
+<style>
+    .employee-card {
+        transition: transform 0.2s ease-in-out;
+        border: 1px solid #e3e6f0;
+    }
+    
+    .employee-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    
+    .permission-stat {
+        padding: 8px 4px;
+    }
+    
+    .stat-number {
+        font-size: 18px;
+        font-weight: bold;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        font-size: 11px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .progress {
+        border-radius: 10px;
+        background-color: #f8f9fc;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .accessible-pages .badge {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+
+    .accessible-pages code {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+</style>
