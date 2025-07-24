@@ -5,7 +5,7 @@
 }
 
 @section Styles {
-        <link rel="stylesheet" href="~/css/employee-management/index.css" />
+<link rel="stylesheet" href="~/css/employee-management/index.css" />
 }
 
 <div class="management-container">
@@ -13,9 +13,12 @@
         <!-- Header -->
         <div class="management-header">
             <h1 class="page-title">👨‍💼 Employee Management</h1>
-            <button type="button" class="btn-primary" onclick="openEmployeeModal()">
-                ➕ Add New Employee
-            </button>
+            @if (ViewBag.CanAddWebPage == true)
+            {
+                <button type="button" class="btn-primary" onclick="openEmployeeModal()">
+                    ➕ Add New Employee
+                </button>
+            }
         </div>
 
         <!-- Filters -->
@@ -69,7 +72,7 @@
                                 <td>
                                     <div class="employee-info">
                                         <div class="employee-avatar">
-                                        @employee.FullName.Substring(0, 1).ToUpper()
+                                            @employee.FullName.Substring(0, 1).ToUpper()
                                         </div>
                                         <div class="employee-details">
                                             <div class="employee-name">@employee.FullName</div>
@@ -85,14 +88,20 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button type="button" class="btn-sm btn-edit" onclick="openEmployeeModal('@employee.EmployeeId')">
-                                            ✏️ Edit
-                                        </button>
-                                        <button type="button" 
-                                                class="btn-sm btn-delete"
-                                                onclick="deleteEmployee('@employee.EmployeeId', '@employee.FullName')">
-                                            🗑️ Delete
-                                        </button>
+                                        @if (ViewBag.CanEditWebPage == true)
+                                        {
+                                            <button type="button" class="btn-sm btn-edit" onclick="openEmployeeModal('@employee.EmployeeId')">
+                                                ✏️ Edit
+                                            </button>
+                                        }
+                                        @if (ViewBag.CanDeleteWebPage == true)
+                                        {
+                                            <button type="button" 
+                                            class="btn-sm btn-delete"
+                                            onclick="deleteEmployee('@employee.EmployeeId', '@employee.FullName')">
+                                                🗑️ Delete
+                                            </button>
+                                        }
                                     </div>
                                 </td>
                             </tr>

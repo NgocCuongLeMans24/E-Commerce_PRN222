@@ -75,6 +75,10 @@ namespace Controllers
         [RequirePermission("view", "/admin/customers")]
         public async Task<IActionResult> Customers(CustomerManagementViewModel model)
         {
+            var employeeId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ViewBag.CanAddWebPage = employeeId == "0" ? true : await _permissionService.HasPermissionAsync(employeeId, "/admin/customers", "add");
+            ViewBag.CanEditWebPage = employeeId == "0" ? true : await _permissionService.HasPermissionAsync(employeeId, "/admin/customers", "edit");
+            ViewBag.CanDeleteWebPage = employeeId == "0" ? true : await _permissionService.HasPermissionAsync(employeeId, "/admin/customers", "delete");
 
             var customers = await _customerService.GetAllCustomersAsync();
 
@@ -296,6 +300,10 @@ namespace Controllers
         [RequirePermission("view", "/admin/employees")]
         public async Task<IActionResult> Employees(EmployeeManagementViewModel model)
         {
+            var employeeId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ViewBag.CanAddWebPage = employeeId == "0" ? true : await _permissionService.HasPermissionAsync(employeeId, "/admin/employees", "add");
+            ViewBag.CanEditWebPage = employeeId == "0" ? true : await _permissionService.HasPermissionAsync(employeeId, "/admin/employees", "edit");
+            ViewBag.CanDeleteWebPage = employeeId == "0" ? true : await _permissionService.HasPermissionAsync(employeeId, "/admin/employees", "delete");
 
             var employees = await _employeeService.GetAllEmployeesAsync();
 

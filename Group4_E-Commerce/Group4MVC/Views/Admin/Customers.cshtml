@@ -5,7 +5,7 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/customer-management/index.css" />
+<link rel="stylesheet" href="~/css/customer-management/index.css" />
 }
 
 <div class="management-container">
@@ -13,9 +13,12 @@
         <!-- Header -->
         <div class="management-header">
             <h1 class="page-title">👥 Customer Management</h1>
-            <button type="button" class="btn-primary" onclick="openCustomerModal()">
-                ➕ Add New Customer
-            </button>
+            @if (ViewBag.CanAddWebPage == true)
+            {
+                <button type="button" class="btn-primary" onclick="openCustomerModal()">
+                    ➕ Add New Customer
+                </button>
+            }
         </div>
 
         <!-- Filters -->
@@ -105,17 +108,23 @@
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button type="button" class="btn-sm btn-edit" onclick="openCustomerModal('@customer.CustomerId')">
-                                                ✏️ Edit
-                                            </button>
-                                            <div>
-                                            @Html.AntiForgeryToken()
-                                            <button type="button" 
-                                                    class="btn-sm btn-toggle @((bool)customer.IsActive ? "deactivate" : "")"
-                                                    onclick="toggleCustomerStatus('@customer.CustomerId', @customer.IsActive.ToString().ToLower())">
-                                            @((bool)customer.IsActive ? "🚫 Deactivate" : "✅ Activate")
-                                            </button>
-                                            </div>
+                                            @if (ViewBag.CanEditWebPage == true)
+                                            {
+                                                <button type="button" class="btn-sm btn-edit" onclick="openCustomerModal('@customer.CustomerId')">
+                                                    ✏️ Edit
+                                                </button>
+                                            }
+                                            @if (ViewBag.CanDeleteWebPage == true)
+                                            {
+                                                <div>
+                                                @Html.AntiForgeryToken()
+                                                <button type="button" 
+                                                        class="btn-sm btn-toggle @((bool)customer.IsActive ? "deactivate" : "")"
+                                                        onclick="toggleCustomerStatus('@customer.CustomerId', @customer.IsActive.ToString().ToLower())">
+                                                @((bool)customer.IsActive ? "🚫 Deactivate" : "✅ Activate")
+                                                </button>
+                                                </div>
+                                            }
                                         </div>
                                     </td>
                                 </tr>

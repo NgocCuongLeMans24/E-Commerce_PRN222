@@ -108,7 +108,8 @@
                                 <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
                                 <td>VND @order.TotalAmount.ToString("N2")</td>
                                 <td>
-                                    <span class="badge badge-success">@order.Status</span>
+                                    @* <span class="badge badge-success">@order.Status</span> *@
+                                    @order.Status
                                 </td>
                             </tr>
                         }
