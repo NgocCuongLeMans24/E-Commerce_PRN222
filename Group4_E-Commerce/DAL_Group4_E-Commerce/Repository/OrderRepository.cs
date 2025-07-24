@@ -69,5 +69,17 @@ namespace DAL_Group4_E_Commerce.Repository
 
 			return await query.ToListAsync();
 		}
-	}
+
+
+        public List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId)
+        {
+            return _context.OrderDetails
+                .Include(od => od.Order)
+                .Include(od => od.Product)
+                .Where(od => od.Product.SupplierId == supplierId)
+                .OrderByDescending(od => od.Order.OrderDate)
+                .ToList();
+        }
+
+    }
 }

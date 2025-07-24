@@ -14,5 +14,14 @@ namespace DAL_Group4_E_Commerce.Repository
         List<Product> GetBySupplier(string supplierId, int take = 4);
         List<Category> GetCategories();
         List<Supplier> GetSuppliers();
+        void Add(Product product);
+        void Update(Product product);
+        void Delete(Product product);
+
+        List<Product> GetPaged(int page, int pageSize, out int total,
+    int? categoryId = null, string? supplierId = null, string? keyword = null,
+    string? sortBy = "ProductId", string? sortOrder = "asc");
+
+
     }
 }

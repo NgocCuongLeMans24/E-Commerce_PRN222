@@ -13,5 +13,17 @@ namespace BUS_Group4_E_Commerce
         List<Product> GetBySupplier(string supplierId, int take = 4);
         List<Category> GetCategories();
         List<Supplier> GetSuppliers();
+
+        void Add(Product product);
+        void Update(Product product);
+
+        void Delete(int productId);
+
+        List<Product> GetPaged(int page, int pageSize, out int total,
+    int? categoryId = null, string? supplierId = null, string? keyword = null,
+    string? sortBy = "ProductId", string? sortOrder = "asc");
+
+        public IEnumerable<OrderDetail> GetOrderHistoryBySupplier(string supplierId);
+
     }
 }

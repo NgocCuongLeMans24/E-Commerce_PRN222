@@ -14,5 +14,8 @@ namespace DAL_Group4_E_Commerce.Repository
 		Task<IEnumerable<Order>> GetAllAsync();
 
 		Task<IEnumerable<Order>> SearchAsync(string? searchTerm);
-	}
+
+        List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId);
+
+    }
 }

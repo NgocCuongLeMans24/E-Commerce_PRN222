@@ -70,5 +70,68 @@ namespace DAL_Group4_E_Commerce.Repository
         {
             return _context.Suppliers.ToList();
         }
+
+        public void Add(Product product)
+        {
+            _context.Products.Add(product);
+            _context.SaveChanges();
+        }
+
+        public void Update(Product product)
+        {
+            _context.Products.Update(product);
+            _context.SaveChanges();
+        }
+
+        public void Delete(int id)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+            if (product != null)
+            {
+                _context.Products.Remove(product);
+                _context.SaveChanges();
+            }
+        }
+
+        public List<Order> GetOrdersBySupplier(string supplierId)
+        {
+            return _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .Where(o => o.OrderDetails.Any(od => od.Product.SupplierId == supplierId))
+                .ToList();
+        }
+
+        public void Delete(Product product)
+        {
+            _context.Products.Remove(product);
+            _context.SaveChanges();
+        }
+
+        public List<Product> GetPaged(int page, int pageSize, out int total,
+    int? categoryId = null, string? supplierId = null, string? keyword = null,
+    string? sortBy = "ProductId", string? sortOrder = "asc")
+        {
+            var query = Filter(categoryId, supplierId, keyword);
+
+
+            query = (sortBy, sortOrder.ToLower()) switch
+            {
+                ("ProductName", "desc") => query.OrderByDescending(p => p.ProductName),
+                ("ProductName", _) => query.OrderBy(p => p.ProductName),
+
+                ("UnitPrice", "desc") => query.OrderByDescending(p => p.UnitPrice),
+                ("UnitPrice", _) => query.OrderBy(p => p.UnitPrice),
+
+                (_, "desc") => query.OrderByDescending(p => p.ProductId),
+                _ => query.OrderBy(p => p.ProductId),
+            };
+
+            total = query.Count();
+
+            return query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        }
+
+
     }
 }

@@ -66,6 +66,8 @@ namespace Group4MVC
             builder.Services.AddSingleton<IOtpService, OtpService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
 
+            builder.Services.AddScoped<ISupplierService, SupplierService>();
+
 
             builder.Services.AddAuthorization(options =>
             {
