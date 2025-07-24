@@ -105,9 +105,9 @@
                 $info.toggleClass('d-none', on);
 
                 if (on) {
-                    $('#FullName').val(custName).prop({ readonly:true, disabled:true });
-                    $('#Phone')   .val(custPhone).prop({ readonly:true, disabled:true });
-                    $('#Address') .val(custAddr) .prop({ readonly:true, disabled:true });
+                    $('#FullName').val(custName).prop({ readonly:true, disabled:false });
+                    $('#Phone')   .val(custPhone).prop({ readonly:true, disabled:false });
+                    $('#Address') .val(custAddr) .prop({ readonly:true, disabled:false });
                 } else {
                     $('#FullName,#Phone,#Address')
                         .prop({ readonly:false, disabled:false })
