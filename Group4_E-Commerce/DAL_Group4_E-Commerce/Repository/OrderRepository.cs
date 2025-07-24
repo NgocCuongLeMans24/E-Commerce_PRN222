@@ -57,6 +57,17 @@ namespace DAL_Group4_E_Commerce.Repository
 			return await query.ToListAsync();
 		}
 
+        public async Task<Order?> GetByIdAsync(int id)
+        {
+            return await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+
+        public async Task<Order> UpdateAsync(Order order)
+        {
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
+            return order;
+        }
 			public IEnumerable<Order> GetOrdersByCustomerId(string customerId)
 			{
 				return _context.Orders
@@ -74,7 +85,6 @@ namespace DAL_Group4_E_Commerce.Repository
 					.Include(o => o.Status)
 					.FirstOrDefault(o => o.OrderId == orderId && o.CustomerId == customerId);
 			}
-		}
 
         public List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId)
         {

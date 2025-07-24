@@ -1,11 +1,11 @@
 ﻿@model ViewModels.AdminDashboardViewModel
 @{
     ViewData["Title"] = "Admin Dashboard";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/admin.css" />
+    <link rel="stylesheet" href="~/css/admin/admin.css" />
 }
 
 <div class="dashboard-container">
@@ -114,9 +114,9 @@
                                 @* } *@
                                 @* else *@
                                 @* { *@
-                                    @customer.FullName.Substring(0, 1).ToUpper()
+                                @customer.FullName.Substring(0, 1).ToUpper()
                                 @* } *@
-                                
+
                             </div>
                             <div class="recent-info">
                                 <div class="recent-name">@customer.FullName</div>
@@ -183,35 +183,35 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <text>
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: '@TempData["SuccessMessage"]',
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true
-                    });
-                </text>
-            }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: '@TempData["SuccessMessage"]',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+            </text>
+        }
 
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <text>
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'error',
-                        title: '@TempData["ErrorMessage"]',
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true
-                    });
-                </text>
-            }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: '@TempData["ErrorMessage"]',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+            </text>
+        }
         });
 
         function loadCss(href) {

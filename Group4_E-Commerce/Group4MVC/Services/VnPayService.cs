@@ -2,6 +2,7 @@
 using GUI_Group4_ECommerce.Helpers;
 using GUI_Group4_ECommerce.ViewModels;
 using System;
+using System.Diagnostics;
 
 namespace GUI_Group4_ECommerce.Services
 {
@@ -47,7 +48,7 @@ namespace GUI_Group4_ECommerce.Services
             vnpay.AddRequestData("vnp_CurrCode", _config["VnPay:CurrCode"]);
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
             vnpay.AddRequestData("vnp_Locale", _config["VnPay:Locale"]);
-            vnpay.AddRequestData("vnp_OrderInfo", $"Payment for order: {model.OrderId}");
+            vnpay.AddRequestData("vnp_OrderInfo", model.OrderId.ToString());
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", _config["VnPay:PaymentBackReturnUrl"]);
             vnpay.AddRequestData("vnp_TxnRef", tick);
@@ -75,14 +76,16 @@ namespace GUI_Group4_ECommerce.Services
             if (!checkSignature) {
                 return new VnPaymentResponseModel
                 {
-                    Success = false
+                    Success = false,
+                    OrderId = vnp_OrderInfo,
+                    VnPayResponseCode = vnp_ResponseCode
                 };
             }
             return new VnPaymentResponseModel { 
                 Success = true,
                 PaymentMethod = "VnPay",
                 OrderDescription = vnp_OrderInfo,
-                OrderId = vnp_orderId.ToString(),
+                OrderId = vnp_OrderInfo,
                 TransactionId = vnp_TransactionId.ToString(),
                 Token = vnp_SecureHash,
                 VnPayResponseCode = vnp_ResponseCode

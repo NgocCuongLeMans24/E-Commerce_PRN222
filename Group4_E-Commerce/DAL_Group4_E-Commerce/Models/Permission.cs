@@ -7,8 +7,6 @@ public partial class Permission
 {
     public int PermissionId { get; set; }
 
-    public string? DepartmentId { get; set; }
-
     public int? PageId { get; set; }
 
     public bool CanAdd { get; set; }
@@ -19,7 +17,9 @@ public partial class Permission
 
     public bool CanView { get; set; }
 
-    public virtual Department? Department { get; set; }
+    public string? EmployeeId { get; set; }
+
+    public virtual Employee? Employee { get; set; }
 
     public virtual WebPage? Page { get; set; }
 }

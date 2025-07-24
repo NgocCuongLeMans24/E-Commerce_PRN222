@@ -15,6 +15,8 @@ namespace BUS_Group4_E_Commerce
 		Task<IEnumerable<Order>> GetAllOrdersAsync();
 
 		Task<IEnumerable<Order>> SearchOrdersAsync(string? searchTerm);
+        Task<Order?> GetOrderByIdAsync(int id);
+        Task UpdateOrderAsync(Order order);
 
         List<OrderDetail> GetOrderDetailsBySupplierId(string supplierId);
     }
