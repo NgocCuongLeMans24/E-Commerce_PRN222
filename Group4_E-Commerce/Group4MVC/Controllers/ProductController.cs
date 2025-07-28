@@ -50,7 +50,20 @@ namespace Group4MVC.Controllers
             if (string.IsNullOrEmpty(ids)) return RedirectToAction("Index");
             var idList = ids.Split(',').Select(id => int.TryParse(id, out var i) ? i : (int?)null).Where(i => i.HasValue).Select(i => i.Value).ToList();
             if (!idList.Any()) return RedirectToAction("Index");
+            
             var products = _productService.GetAll().Where(p => idList.Contains(p.ProductId)).ToList();
+            
+            // Check if all products have the same category
+            if (products.Count > 1)
+            {
+                var firstCategoryId = products.First().CategoryId;
+                if (products.Any(p => p.CategoryId != firstCategoryId))
+                {
+                    TempData["ErrorMessage"] = "You can only compare products from the same category!";
+                    return RedirectToAction("Index");
+                }
+            }
+            
             return View(products);
         }
     }

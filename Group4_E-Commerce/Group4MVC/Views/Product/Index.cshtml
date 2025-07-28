@@ -26,6 +26,28 @@
 <!-- Main Shop Section -->
 <div class="shop-section">
     <div class="container">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        @TempData["ErrorMessage"]
+                    </div>
+                    <div class="d-flex align-items-center">
+                        @if (TempData["ShowClearCompare"] != null && (bool)TempData["ShowClearCompare"])
+                        {
+                            <button type="button" class="btn btn-outline-danger btn-sm mr-2" id="clear-compare-btn">
+                                <i class="fas fa-trash"></i> Clear Compare
+                            </button>
+                        }
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
         <div class="row">
             <!-- Sidebar Filters -->
             <div class="col-lg-3 col-md-4">
@@ -61,17 +83,17 @@
                                 </label>
                                 <select class="filter-select" name="categoryId">
                                     <option value="">All Categories</option>
-                                    @if (ViewBag.Suppliers != null)
+                                    @if (ViewBag.Categories != null)
                                     {
-                                        foreach (var sup in ViewBag.Suppliers)
+                                        foreach (var cat in ViewBag.Categories)
                                         {
-                                            if (selectedSupplierId == sup.SupplierId.ToString())
+                                            if (selectedCategoryId == cat.CategoryId.ToString())
                                             {
-                                                <option value="@sup.SupplierId" selected>@sup.CompanyName</option>
+                                                <option value="@cat.CategoryId" selected>@cat.CategoryName</option>
                                             }
                                             else
                                             {
-                                                <option value="@sup.SupplierId">@sup.CompanyName</option>
+                                                <option value="@cat.CategoryId">@cat.CategoryName</option>
                                             }
                                         }
                                     }
@@ -268,19 +290,35 @@
         $(document).on('click', '.compare-btn', function (e) {
             e.preventDefault();
             var pid = $(this).data('product-id');
+            var categoryId = $(this).data('category-id');
             var compare = getList('compare');
+            var compareCategories = getList('compareCategories');
             
             if (compare.includes(pid)) {
+                // Remove from compare
                 compare = compare.filter(x => x !== pid);
+                compareCategories = compareCategories.filter(x => x !== categoryId);
             } else {
+                // Check if we can add to compare
                 if (compare.length >= 4) {
                     alert('You can only compare up to 4 products!');
                     return;
                 }
+                
+                // Check if category is different from existing products
+                if (compare.length > 0 && !compareCategories.includes(categoryId)) {
+                    alert('You can only compare products from the same category!');
+                    return;
+                }
+                
                 compare.push(pid);
+                if (!compareCategories.includes(categoryId)) {
+                    compareCategories.push(categoryId);
+                }
             }
             
             setList('compare', compare);
+            setList('compareCategories', compareCategories);
             updateIcons();
         });
 
@@ -293,6 +331,25 @@
             } else {
                 $('#compare-float-btn').removeClass('show');
             }
+        }
+
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = $(`
+                <div class="alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show"
+                     style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `);
+
+            $('body').append(notification);
+
+            setTimeout(() => {
+                notification.alert('close');
+            }, 3000);
         }
 
         // Go to compare page
@@ -348,6 +405,22 @@
             } else {
                 $('.products-grid').removeClass('list-view');
             }
+        });
+
+        // Clear compare functionality
+        $(document).on('click', '#clear-compare-btn', function () {
+            // Clear compare lists from localStorage
+            localStorage.removeItem('compare');
+            localStorage.removeItem('compareCategories');
+            
+            // Update UI
+            updateIcons();
+            
+            // Hide the alert
+            $(this).closest('.alert').alert('close');
+            
+            // Show success notification
+            showNotification('Compare list has been cleared!', 'success');
         });
 
         // Initialize
