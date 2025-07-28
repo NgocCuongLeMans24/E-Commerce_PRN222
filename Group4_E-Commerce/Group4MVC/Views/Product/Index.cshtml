@@ -85,6 +85,7 @@
                                     <option value="">All Categories</option>
                                     @if (ViewBag.Categories != null)
                                     {
+
                                         foreach (var cat in ViewBag.Categories)
                                         {
                                             if (selectedCategoryId == cat.CategoryId.ToString())
