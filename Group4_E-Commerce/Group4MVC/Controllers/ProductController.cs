@@ -31,7 +31,7 @@ namespace Group4MVC.Controllers
             if (product == null) return NotFound();
             ViewBag.Related = _productService.GetRelatedProducts(id);
             ViewBag.SameSupplier = _productService.GetBySupplier(product.SupplierId);
-            return View(product);
+            return View(product);   
         }
 
         [HttpGet]

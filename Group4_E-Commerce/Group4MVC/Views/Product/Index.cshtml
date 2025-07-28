@@ -61,17 +61,17 @@
                                 </label>
                                 <select class="filter-select" name="categoryId">
                                     <option value="">All Categories</option>
-                                    @if (ViewBag.Suppliers != null)
+                                    @if (ViewBag.Categories != null)
                                     {
-                                        foreach (var sup in ViewBag.Suppliers)
+                                        foreach (var sup in ViewBag.Categories)
                                         {
-                                            if (selectedSupplierId == sup.SupplierId.ToString())
+                                            if (selectedSupplierId == sup.CategoryId.ToString())
                                             {
-                                                <option value="@sup.SupplierId" selected>@sup.CompanyName</option>
+                                                <option value="@sup.CategoryId" selected>@sup.CategoryName</option>
                                             }
                                             else
                                             {
-                                                <option value="@sup.SupplierId">@sup.CompanyName</option>
+                                                <option value="@sup.CategoryId">@sup.CategoryName</option>
                                             }
                                         }
                                     }
