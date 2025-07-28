@@ -85,7 +85,7 @@ namespace GUI_Group4_ECommerce.Controllers
         {
             if (CartItems.Count == 0)
             {
-                return Redirect("/");
+                return RedirectToAction("Index", "Product");
             }
             return View(CartItems);
         }

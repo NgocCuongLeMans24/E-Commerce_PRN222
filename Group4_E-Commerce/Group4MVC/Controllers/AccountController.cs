@@ -375,7 +375,7 @@ namespace Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Product");
         }
 
         private async Task SignInUserAsync(string userId, string fullName, string email, string userType, bool rememberMe)
@@ -412,7 +412,7 @@ namespace Controllers
             }
             else
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Product");
             }
         }
 
