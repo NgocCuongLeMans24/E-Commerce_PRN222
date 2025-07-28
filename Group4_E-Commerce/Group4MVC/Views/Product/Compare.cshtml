@@ -5,6 +5,13 @@
     var vi = new System.Globalization.CultureInfo("vi-VN");
 }
 <h2 class="my-4">Product Comparison</h2>
+@if (Model != null && Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        Comparing products from category: <strong>@Model.First().Category?.CategoryName</strong>
+    </div>
+}
 @if (Model == null || !Model.Any())
 {
     <div class="alert alert-warning">No products to compare.</div>
@@ -59,6 +66,13 @@ else
                     }
                 </tr>
                 <tr>
+                    <td>Category</td>
+                    @foreach (var p in Model)
+                    {
+                        <td>@p.Category?.CategoryName</td>
+                    }
+                </tr>
+                <tr>
                     <td>Supplier</td>
                     @foreach (var p in Model)
                     {
@@ -69,4 +83,51 @@ else
         </table>
     </div>
 }
-<a href="@Url.Action("Index", "Product")" class="btn btn-secondary mt-3">Back to product list</a>
+<div class="d-flex gap-3 mt-3">
+    <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to product list
+    </a>
+    <button type="button" class="btn btn-outline-danger" id="clear-compare-btn">
+        <i class="fas fa-trash"></i> Clear Compare
+    </button>
+</div>
+
+@section Scripts {
+    <script>
+        // Clear compare functionality
+        $(document).on('click', '#clear-compare-btn', function () {
+            if (confirm('Are you sure you want to clear the compare list?')) {
+                // Clear compare lists from localStorage
+                localStorage.removeItem('compare');
+                localStorage.removeItem('compareCategories');
+                
+                // Show success notification
+                showNotification('Compare list has been cleared!', 'success');
+                
+                // Redirect back to product list after a short delay
+                setTimeout(() => {
+                    window.location.href = '@Url.Action("Index", "Product")';
+                }, 1500);
+            }
+        });
+
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = $(`
+                <div class="alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show"
+                     style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `);
+
+            $('body').append(notification);
+
+            setTimeout(() => {
+                notification.alert('close');
+            }, 3000);
+        }
+    </script>
+}

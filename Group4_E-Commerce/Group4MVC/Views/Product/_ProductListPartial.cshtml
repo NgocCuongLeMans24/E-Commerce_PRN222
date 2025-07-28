@@ -354,6 +354,7 @@ else
 
                             <button class="action-btn compare-btn"
                                     data-product-id="@product.ProductId"
+                                    data-category-id="@product.CategoryId"
                                     title="Add to Compare">
                                 <i class="fas fa-balance-scale"></i>
                             </button>
@@ -494,22 +495,37 @@ else
         $(document).on('click', '.compare-btn', function (e) {
             e.preventDefault();
             var pid = parseInt($(this).data('product-id'));
+            var categoryId = parseInt($(this).data('category-id'));
             var compare = getList('compare');
+            var compareCategories = getList('compareCategories');
 
             if (compare.includes(pid)) {
+                // Remove from compare
                 compare = compare.filter(x => x !== pid);
+                compareCategories = compareCategories.filter(x => x !== categoryId);
                 showNotification('Removed from compare', 'info');
             } else {
-
+                // Check if we can add to compare
                 if (compare.length >= 4) {
                     showNotification('You can only compare up to 4 products!', 'warning');
                     return;
                 }
+
+                // Check if category is different from existing products
+                if (compare.length > 0 && !compareCategories.includes(categoryId)) {
+                    showNotification('You can only compare products from the same category!', 'warning');
+                    return;
+                }
+
                 compare.push(pid);
+                if (!compareCategories.includes(categoryId)) {
+                    compareCategories.push(categoryId);
+                }
                 showNotification('Added to compare', 'success');
             }
 
             setList('compare', compare);
+            setList('compareCategories', compareCategories);
             updateIcons();
         });
 
@@ -542,6 +558,22 @@ else
                 notification.alert('close');
             }, 3000);
         }
+
+        // Clear compare functionality (for partial view)
+        $(document).on('click', '#clear-compare-btn', function () {
+            // Clear compare lists from localStorage
+            localStorage.removeItem('compare');
+            localStorage.removeItem('compareCategories');
+            
+            // Update UI
+            updateIcons();
+            
+            // Hide the alert
+            $(this).closest('.alert').alert('close');
+            
+            // Show success notification
+            showNotification('Compare list has been cleared!', 'success');
+        });
 
         // Export function for parent page
         window.afterAjaxProductList = function() {
